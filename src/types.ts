@@ -79,3 +79,14 @@ export const CATEGORY_LIST: CustomerCategory[][] = [
   ["BAPENDA"],
   ["POLDA"],
 ];
+
+export const PROPERTIES_LIST: CustomerProperty[][] = [
+  ["submit_proposal"],
+  ["connectivity"],
+  ["eazy"],
+  ["oca"],
+  ["digiclinic"],
+  ["pijar"],
+  ["sprinthink"],
+  ["nilai_project"],
+];

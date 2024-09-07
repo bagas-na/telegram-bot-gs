@@ -6,7 +6,13 @@ import {
   ReplyKeyboardRemove,
   Update,
 } from "@grammyjs/types";
-import { getCustomerList, getUserCache, isRegisteredUser, sendText, updateUserCache } from "./data_management";
+import {
+  getCustomerList,
+  getUserCache,
+  isRegisteredUser,
+  sendText,
+  updateUserCache,
+} from "./data_management";
 import {
   handleCreateCustomer,
   handleDeleteCustomer,
@@ -14,7 +20,7 @@ import {
   handleSelectCustomer,
   handleSelectProperty,
   handleUpdateCustomer,
-  handleUpdateProperty
+  handleUpdateProperty,
 } from "./handler";
 import {
   CATEGORIES,
@@ -48,7 +54,7 @@ function doPost(e: DoPostEvent): void {
   const fullName = [firstName, lastName].join(" ").trim();
   // const text = incomingMessage.text ? incomingMessage.text.toLowerCase() : "";
 
-  const cache = getUserCache(chatId)
+  const cache = getUserCache(chatId);
 
   // Mengecek apakah user terdaftar di Google Sheets
   if (!isRegisteredUser(chatId)) {
@@ -83,22 +89,21 @@ function doPost(e: DoPostEvent): void {
       handleUpdateProperty(incomingMessage, cache);
       break;
     default:
-
       let categoryList: string[][] = [];
-      for(let i = 0; i < CATEGORIES.length; i++) {
-        categoryList.push([CATEGORIES[i]])
+      for (let i = 0; i < CATEGORIES.length; i++) {
+        categoryList.push([CATEGORIES[i]]);
       }
 
-      sendText(
-        chatId,
-        "Hai " + fullName + ", Anda sudah terdaftar. Silakan pilih kategori pelanggan.",
-        {
-          keyboard: categoryList,
-          one_time_keyboard: true,
-          resize_keyboard: true,
-        }
-      );
-      updateUserCache(chatId, {userState: "is_selecting_category"})
+      let customerText = "Hai " + fullName + ", Anda sudah terdaftar.\n\n";
+      customerText += "**Silahkan pilih kategori pelanggan**\n";
+      customerText += "Langsung klik saja pada tombol yang muncul di bawah!";
+
+      sendText(chatId, customerText, {
+        keyboard: categoryList,
+        one_time_keyboard: true,
+        resize_keyboard: true,
+      });
+      updateUserCache(chatId, { userState: "is_selecting_category" });
   }
 
   return;
