@@ -6,13 +6,15 @@ import {
   ReplyKeyboardRemove,
   Update,
 } from "@grammyjs/types";
-import { getCustomerList, isUserRegistered, sendText } from "./data_management";
+import { getCustomerList, getUserCache, isRegisteredUser, sendText, updateUserCache } from "./data_management";
 import {
   handleCreateCustomer,
-  handleEmptyCategory,
+  handleDeleteCustomer,
   handleSelectCategory,
   handleSelectCustomer,
+  handleSelectProperty,
   handleUpdateCustomer,
+  handleUpdateProperty
 } from "./handler";
 import {
   CATEGORIES,
@@ -36,6 +38,7 @@ function doPost(e: DoPostEvent): void {
   const incomingMessage = update.message;
 
   if (incomingMessage === undefined) {
+    Logger.log("Message is empty, exit from doPost()");
     return;
   }
 
@@ -45,11 +48,10 @@ function doPost(e: DoPostEvent): void {
   const fullName = [firstName, lastName].join(" ").trim();
   // const text = incomingMessage.text ? incomingMessage.text.toLowerCase() : "";
 
-  const rawCache = CacheService.getUserCache().get(String(chatId));
-  const cache: UserCache = rawCache ? JSON.parse(rawCache) : {};
+  const cache = getUserCache(chatId)
 
   // Mengecek apakah user terdaftar di Google Sheets
-  if (!isUserRegistered(chatId)) {
+  if (!isRegisteredUser(chatId)) {
     sendText(
       chatId,
       "Maaf " + fullName + ", Anda belum terdaftar. Hubungi admin untuk pendaftaran."
@@ -62,9 +64,6 @@ function doPost(e: DoPostEvent): void {
     case "is_selecting_category":
       handleSelectCategory(incomingMessage, cache);
       break;
-    case "empty_category":
-      handleEmptyCategory(incomingMessage, cache);
-      break;
     case "is_selecting_customer":
       handleSelectCustomer(incomingMessage, cache);
       break;
@@ -74,8 +73,17 @@ function doPost(e: DoPostEvent): void {
     case "update_customer":
       handleUpdateCustomer(incomingMessage, cache);
       break;
+    case "delete_customer":
+      handleDeleteCustomer(incomingMessage, cache);
+      break;
+    case "is_selecting_property":
+      handleSelectProperty(incomingMessage, cache);
+      break;
+    case "update_property":
+      handleUpdateProperty(incomingMessage, cache);
+      break;
     default:
-      
+
       let categoryList: string[][] = [];
       for(let i = 0; i < CATEGORIES.length; i++) {
         categoryList.push([CATEGORIES[i]])
@@ -90,8 +98,7 @@ function doPost(e: DoPostEvent): void {
           resize_keyboard: true,
         }
       );
-      const newUserCache: UserCache = { ...cache, userState: "is_selecting_category" };
-      CacheService.getUserCache().put(String(chatId), JSON.stringify(newUserCache));
+      updateUserCache(chatId, {userState: "is_selecting_category"})
   }
 
   return;

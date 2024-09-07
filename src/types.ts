@@ -43,10 +43,24 @@ export type UserCache = {
     | "delete_customer"
     | "is_selecting_property"
     | "update_property";
-  customer_category?: CustomerCategory;   // untuk state empty_category dan seterusnya
-  customer_list?: [number, string][] | null;  // untuk menentukan nomor urut di update_customer dan delete_customer
+  customer_category?: CustomerCategory; // untuk state is_selecting_customer dan seterusnya
+  customer_list?: string[] | null; // untuk menentukan nomor urut di update_customer dan delete_customer
   customer_name?: string | null; // untuk menyimpan nama pelanggan di is_selecting_property dan update_property
   customer_property?: CustomerProperty | null;
+};
+
+export type Funnel = "F0" | "F3" | "F4" | "F5";
+export type CustomerData = {
+  customer_category: string;
+  name: string;
+  submit_proposal: boolean;
+  connectivity: Funnel;
+  eazy: Funnel;
+  oca: Funnel;
+  digiclinic: Funnel;
+  pijar: Funnel;
+  sprinthink: Funnel;
+  nilai_project: number;
 };
 
 export interface MyPostData extends GoogleAppsScript.Events.AppsScriptHttpRequestEventPostData {
@@ -64,4 +78,4 @@ export const CATEGORY_LIST: CustomerCategory[][] = [
   ["SETDA"],
   ["BAPENDA"],
   ["POLDA"],
-]
+];
