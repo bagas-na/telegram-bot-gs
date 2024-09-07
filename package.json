@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "@types/google-apps-script": "^1.0.83",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@grammyjs/types": "^3.14.0"
+  }
+}
