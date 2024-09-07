@@ -5,7 +5,7 @@ import {
   ReplyKeyboardRemove,
 } from "@grammyjs/types";
 
-const CATEGORIES = [
+export const CATEGORIES = [
   "RSUD",
   "PUSKESMAS",
   "SEKOLAH NEGERI",
@@ -14,7 +14,8 @@ const CATEGORIES = [
   "BAPENDA",
   "POLDA",
 ] as const;
-const PROPERTIES = [
+
+export const PROPERTIES = [
   "submit_proposal",
   "connectivity",
   "eazy",
@@ -25,10 +26,14 @@ const PROPERTIES = [
   "nilai_project",
 ] as const;
 
-type CustomerCategory = (typeof CATEGORIES)[number];
-type CustomerProperty = (typeof PROPERTIES)[number];
-type ReplyMarkup = InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply;
-type UserCache = {
+export type CustomerCategory = (typeof CATEGORIES)[number];
+export type CustomerProperty = (typeof PROPERTIES)[number];
+export type ReplyMarkup =
+  | InlineKeyboardMarkup
+  | ReplyKeyboardMarkup
+  | ReplyKeyboardRemove
+  | ForceReply;
+export type UserCache = {
   userState:
     | "is_selecting_category"
     | "empty_category"
@@ -36,16 +41,27 @@ type UserCache = {
     | "create_customer"
     | "update_customer"
     | "delete_customer"
-    | "is_selecting_property";
-  customer_category?: CustomerCategory;
-  customer_list?: [number, string][] | null;
-  customer_name?: string | null;
+    | "is_selecting_property"
+    | "update_property";
+  customer_category?: CustomerCategory;   // untuk state empty_category dan seterusnya
+  customer_list?: [number, string][] | null;  // untuk menentukan nomor urut di update_customer dan delete_customer
+  customer_name?: string | null; // untuk menyimpan nama pelanggan di is_selecting_property dan update_property
   customer_property?: CustomerProperty | null;
 };
 
-interface MyPostData extends GoogleAppsScript.Events.AppsScriptHttpRequestEventPostData {
+export interface MyPostData extends GoogleAppsScript.Events.AppsScriptHttpRequestEventPostData {
   getDataAsString(): string;
 }
-interface DoPostEvent extends GoogleAppsScript.Events.DoPost {
+export interface DoPostEvent extends GoogleAppsScript.Events.DoPost {
   postData: MyPostData;
 }
+
+export const CATEGORY_LIST: CustomerCategory[][] = [
+  ["RSUD"],
+  ["PUSKESMAS"],
+  ["SEKOLAH NEGERI"],
+  ["DINAS"],
+  ["SETDA"],
+  ["BAPENDA"],
+  ["POLDA"],
+]

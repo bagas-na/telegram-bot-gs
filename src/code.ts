@@ -6,10 +6,22 @@ import {
   ReplyKeyboardRemove,
   Update,
 } from "@grammyjs/types";
-
-
-
-
+import { getCustomerList, isUserRegistered, sendText } from "./data_management";
+import {
+  handleCreateCustomer,
+  handleEmptyCategory,
+  handleSelectCategory,
+  handleSelectCustomer,
+  handleUpdateCustomer,
+} from "./handler";
+import {
+  CATEGORIES,
+  CustomerCategory,
+  CustomerProperty,
+  DoPostEvent,
+  PROPERTIES,
+  UserCache,
+} from "./types";
 
 // Fungsi untuk menyetel webhook
 function setWebhook() {
@@ -31,7 +43,7 @@ function doPost(e: DoPostEvent): void {
   const firstName = incomingMessage.chat.first_name;
   const lastName = incomingMessage.chat.last_name;
   const fullName = [firstName, lastName].join(" ").trim();
-  const text = incomingMessage.text ? incomingMessage.text.toLowerCase() : "";
+  // const text = incomingMessage.text ? incomingMessage.text.toLowerCase() : "";
 
   const rawCache = CacheService.getUserCache().get(String(chatId));
   const cache: UserCache = rawCache ? JSON.parse(rawCache) : {};
@@ -63,11 +75,17 @@ function doPost(e: DoPostEvent): void {
       handleUpdateCustomer(incomingMessage, cache);
       break;
     default:
+      
+      let categoryList: string[][] = [];
+      for(let i = 0; i < CATEGORIES.length; i++) {
+        categoryList.push([CATEGORIES[i]])
+      }
+
       sendText(
         chatId,
         "Hai " + fullName + ", Anda sudah terdaftar. Silakan pilih kategori pelanggan.",
         {
-          keyboard: [[...CATEGORIES]],
+          keyboard: categoryList,
           one_time_keyboard: true,
           resize_keyboard: true,
         }
@@ -78,7 +96,5 @@ function doPost(e: DoPostEvent): void {
 
   return;
 }
-
-
 
 // Fungsi untuk menampilkan daftar customer berdasarkan kategori dan ID Telegram user

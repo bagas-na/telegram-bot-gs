@@ -1,4 +1,14 @@
-function getCustomerList(
+import {
+  ForceReply,
+  InlineKeyboardMarkup,
+  Message,
+  ReplyKeyboardMarkup,
+  ReplyKeyboardRemove,
+  Update,
+} from "@grammyjs/types";
+import { CATEGORIES, CustomerCategory, CustomerProperty, DoPostEvent, PROPERTIES, ReplyMarkup, UserCache } from "./types";
+
+export function getCustomerList(
   chatId: number,
   category: CustomerCategory
 ): Array<[number, string]> | null {
@@ -30,7 +40,7 @@ function getCustomerList(
 }
 
 // Fungsi untuk menyimpan nama customer ke sheet
-function saveCustomerName(chatId: number, customerName: string) {
+export function saveCustomerName(chatId: number, customerName: string) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
 
   if (!sheet) {
@@ -58,7 +68,7 @@ function updateCategory(chatId: number, category: CustomerCategory) {
 }
 
 // Fungsi untuk mengirim teks ke chat dengan markup keyboard
-function sendText(chatId: number, text: string, replyMarkup?: ReplyMarkup): void {
+export function sendText(chatId: number, text: string, replyMarkup?: ReplyMarkup): void {
   const data: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
     method: "post",
     payload: {
@@ -75,7 +85,7 @@ function sendText(chatId: number, text: string, replyMarkup?: ReplyMarkup): void
 }
 
 // Fungsi untuk mengecek apakah user terdaftar di Google Sheets
-function isUserRegistered(chatId: number): boolean {
+export function isUserRegistered(chatId: number): boolean {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_REFERENSI);
   if (!sheet) {
     Logger.log("Spreadsheet ID or sheet name does not exist");

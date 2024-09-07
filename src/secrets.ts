@@ -4,4 +4,3 @@ const WEB_APP_URL = "<apps_script_deployment_web_app_url>";
 const SPREADSHEET_ID = "<google_sheets_id>";
 const SHEET_REFERENSI = "REFERENSI";
 const SHEET_DATA = "DATA";
-
