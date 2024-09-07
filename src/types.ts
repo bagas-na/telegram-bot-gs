@@ -40,7 +40,7 @@ export type UserCache = {
     | "is_selecting_customer"
     | "create_customer"
     | "update_customer"
-    | "delete_customer"
+    | "rename_customer"
     | "is_selecting_property"
     | "update_property";
   customer_category?: CustomerCategory; // untuk state is_selecting_customer dan seterusnya

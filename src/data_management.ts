@@ -17,10 +17,7 @@ import {
   UserCache,
 } from "./types";
 
-export function getCustomerList(
-  chatId: number,
-  customerCategory: CustomerCategory
-): string[] | null {
+export function getCustomerList(chatId: number, customerCategory: CustomerCategory): string[] | null {
   const sheetData = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
   if (!sheetData) {
     Logger.log("Cannot get customer list. Spreadsheet ID or sheet name does not exist");
@@ -36,11 +33,7 @@ export function getCustomerList(
     const dataCustomerName: string = data[i][4]; // Kolom E (Nama Customer)
 
     // Cek kecocokan ID Telegram dan Kategori
-    if (
-      String(dataChatId) === String(chatId) &&
-      dataCategory === customerCategory &&
-      dataCustomerName !== ""
-    ) {
+    if (String(dataChatId) === String(chatId) && dataCategory === customerCategory && dataCustomerName !== "") {
       customerList.push(dataCustomerName); // Tambahkan indeks dan nama customer yang cocok ke daftar
     }
   }
@@ -49,11 +42,7 @@ export function getCustomerList(
 }
 
 // Fungsi untuk menyimpan nama customer baru ke sheet
-export function saveNewCustomer(
-  chatId: number,
-  customerCategory: CustomerCategory,
-  customerName: string
-): void {
+export function saveNewCustomer(chatId: number, customerCategory: CustomerCategory, customerName: string): void {
   const sheetData = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
   if (!sheetData) {
     Logger.log("Cannot save customer data. Spreadsheet ID or sheet name does not exist");
@@ -71,13 +60,13 @@ export function saveNewCustomer(
 
   // Nilai default untuk kolom-kolom lainnya
   sheetData.getRange(lastRow, 6).setValue(false); // Submit proposal
-  sheetData.getRange(lastRow, 7).setValue("F0");  // Connectivity
-  sheetData.getRange(lastRow, 8).setValue("F0");  // Eazy
-  sheetData.getRange(lastRow, 9).setValue("F0");  // OCA
+  sheetData.getRange(lastRow, 7).setValue("F0"); // Connectivity
+  sheetData.getRange(lastRow, 8).setValue("F0"); // Eazy
+  sheetData.getRange(lastRow, 9).setValue("F0"); // OCA
   sheetData.getRange(lastRow, 10).setValue("F0"); // Digiclinic
   sheetData.getRange(lastRow, 11).setValue("F0"); // Pijar
   sheetData.getRange(lastRow, 12).setValue("F0"); // Sprinthink
-  sheetData.getRange(lastRow, 13).setValue(0);    // Nilai project
+  sheetData.getRange(lastRow, 13).setValue(0); // Nilai project
 }
 
 // Fungsi untuk mengambil data customer, return null jika tidak ditemukan
@@ -125,7 +114,7 @@ export function formatCustomerData(customerData: CustomerData): string {
   let formatText = "------\n";
   formatText += "Kategori: " + customerData.customer_category + "\n";
   formatText += "Nama GC: " + customerData.name + "\n";
-  formatText += "Submit Proposal (ya/tidak): " + customerData.submit_proposal ? "ya" : "tidak" + "\n";
+  formatText += "Submit Proposal (sudah/belum): " + customerData.submit_proposal ? "sudah" : "belum" + "\n";
   formatText += "Connectivity: " + customerData.connectivity + "\n";
   formatText += "Antares Eazy: " + customerData.eazy + "\n";
   formatText += "OCA: " + customerData.oca + "\n";
@@ -135,7 +124,7 @@ export function formatCustomerData(customerData: CustomerData): string {
   formatText += "Nilai Project (Rp): " + customerData.nilai_project + "\n";
   formatText += "------\n";
 
-  return formatText
+  return formatText;
 }
 
 // Fungsi untuk mengirim teks ke chat dengan markup keyboard

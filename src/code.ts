@@ -15,7 +15,7 @@ import {
 } from "./data_management";
 import {
   handleCreateCustomer,
-  handleDeleteCustomer,
+  handleRenameCustomer,
   handleSelectCategory,
   handleSelectCustomer,
   handleSelectProperty,
@@ -79,8 +79,8 @@ function doPost(e: DoPostEvent): void {
     case "update_customer":
       handleUpdateCustomer(incomingMessage, cache);
       break;
-    case "delete_customer":
-      handleDeleteCustomer(incomingMessage, cache);
+    case "rename_customer":
+      handleRenameCustomer(incomingMessage, cache);
       break;
     case "is_selecting_property":
       handleSelectProperty(incomingMessage, cache);
@@ -94,11 +94,11 @@ function doPost(e: DoPostEvent): void {
         categoryList.push([CATEGORIES[i]]);
       }
 
-      let customerText = "Hai " + fullName + ", Anda sudah terdaftar.\n\n";
-      customerText += "**Silahkan pilih kategori pelanggan**\n";
-      customerText += "Langsung klik saja pada tombol yang muncul di bawah!";
+      let clientText = "Hai " + fullName + ", Anda sudah terdaftar.\n\n";
+      clientText += "**Silahkan pilih kategori pelanggan**\n";
+      clientText += "Langsung klik saja pada tombol yang muncul di bawah!";
 
-      sendText(chatId, customerText, {
+      sendText(chatId, clientText, {
         keyboard: categoryList,
         one_time_keyboard: true,
         resize_keyboard: true,
