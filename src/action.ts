@@ -10,6 +10,7 @@ import {
   PROPERTIES_LIST,
 } from "./types";
 
+// Fungsi yang dijalankan sebelum mengubah userState menjadi "select_category"
 export function goToSelectCategory(chatId: number, customText?: string): void {
   let defaultText = "**Silahkan pilih kategori pelanggan**\n";
   defaultText += "Langsung klik saja pada tombol yang muncul di bawah!";
@@ -22,37 +23,33 @@ export function goToSelectCategory(chatId: number, customText?: string): void {
   updateUserCache(chatId, { userState: "select_category" });
 }
 
+// Fungsi yang dijalankan sebelum mengubah userState menjadi "select_customer"
 export function goToSelectCustomer(
   chatId: number,
   customerList: string[] | null,
   chosenCategory: CustomerCategory
 ): void {
   const category = chosenCategory;
+  let clientText: string;
 
   if (customerList === null || customerList.length === 0) {
     /**
-     * Jika tidak ada customer (kolom E) yang sesuai, kirim pesan bahwa kategori masih kosong
+     * Jika customerList masih kosong, beri pesan bahwa kategori masih kosong
      * Kemudian, berikan pilihan:
      *  YA untuk menambahkan pelanggan
      *  TIDAK untuk memilih kategori pelanggan kembali
      */
     sendText(chatId, "Kategori " + category + " masih kosong.");
 
-    let clientText = "➡️ Ketik `NEW [nama_gc]` untuk menambahkan pelanggan baru.\n";
+    clientText = "➡️ Ketik `NEW [nama_gc]` untuk menambahkan pelanggan baru.\n";
     clientText += "contoh: **NEW SMA 8 Bandung**.\n\n";
     clientText += "➡️ Pilih atau ketik **CANCEL** untuk kembali ke pilihan **kategori** pelanggan.";
-
-    sendText(chatId, clientText, {
-      keyboard: [["CANCEL"]],
-      one_time_keyboard: true,
-      resize_keyboard: true,
-    });
-  } else if (customerList.length > 0) {
+  } else {
     /**
-     * Jika ada customer yang cocok dan tidak kosong, tampilkan daftarnya
+     * Jika customerList.length > 0, tampilkan daftarnya
      * Kemudian, berikan instruksi untuk memilih.
      */
-    let clientText = "Daftar Customer untuk kategori " + category + ":\n";
+    clientText = "Daftar Customer untuk kategori " + category + ":\n";
     for (let i = 0; i < customerList.length; i++) {
       clientText = String(i + 1) + ". " + customerList[i] + "\n";
     }
@@ -63,18 +60,21 @@ export function goToSelectCustomer(
     clientText += "➡️ Ketik `UPDATE [nama_gc]` atau `UPDATE [no. urut]` untuk update informasi pelanggan.\n";
     clientText += "contoh: **UPDATE SMA 3 Bandung**, atau **UPDATE 12**.\n\n";
     clientText += "➡️ Pilih atau ketik **CANCEL** untuk kembali ke pilihan **kategori** pelanggan!";
-
-    sendText(chatId, clientText, {
-      keyboard: [["CANCEL"]],
-      one_time_keyboard: true,
-      resize_keyboard: true,
-    });
   }
+
+  // Berikan pilihan CANCEL jika user ingin kembali ke pilihan daftar kategori pelanggan
+  sendText(chatId, clientText, {
+    keyboard: [["CANCEL"]],
+    one_time_keyboard: true,
+    resize_keyboard: true,
+  });
 
   updateUserCache(chatId, {
     userState: "select_customer",
     customer_category: category as CustomerCategory,
   });
+
+  return
 }
 
 export function goToCreateCustomer(chatId: number, category: CustomerCategory, customerName: string): void {
@@ -153,26 +153,28 @@ export function goToSelectProperty(
 
 export function goToUpdateProperty(chatId: number, chosenProperty: CustomerProperty, customerData: CustomerData): void {
   let clientText;
+  let keyboardOptions;
   clientText = `Status ${MAP_PROPS_TO_TEXT[chosenProperty]} untuk pelanggan ini adalah sebagai berikut:\n\n`;
   clientText += `Kategori: ${customerData.customer_category}\n`;
   clientText += `Nama GC: ${customerData.name}\n`;
   clientText += `${MAP_PROPS_TO_TEXT[chosenProperty]}: `;
   sendText(chatId, clientText);
 
-  clientText = (function (property: CustomerProperty) {
-    if (chosenProperty === "nilai_project") {
-      return "➡️ Masukkan estimasi nilai total proyek pada pelanggan ini.\n\n";
-    }
-    return `➡️ Klik pada tombol di bawah untuk mengubah status ${MAP_PROPS_TO_TEXT[chosenProperty]}.\n\n`;
-  })(chosenProperty);
-  clientText += "➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
+  if (chosenProperty === "nilai_project") {
+    clientText = "➡️ Masukkan estimasi nilai total proyek pada pelanggan ini.\n\n";
+    clientText += "➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
+  } else {
+    clientText = `➡️ Klik pada tombol di bawah untuk mengubah status ${MAP_PROPS_TO_TEXT[chosenProperty]}.\n\n`
+    clientText += "➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
+  }
 
-  const keyboardOptions: string[][] = (function (property: CustomerProperty) {
-    if (property === "submit_proposal") return [["SUDAH"], ["BELUM"], ["CANCEL"]];
-    if (FUNNEL_PROPERTIES.includes(property))
-      return [["F0 (lead)"], ["F3 (submit)"], ["F4 (negotiation)"], ["F5 (win)"], ["CANCEL"]];
-    return [["CANCEL"]];
-  })(chosenProperty);
+  if (chosenProperty === "submit_proposal") {
+    keyboardOptions = [["SUDAH"], ["BELUM"], ["CANCEL"]]
+  } else if (FUNNEL_PROPERTIES.includes(chosenProperty)) {
+    keyboardOptions = [["F0 (lead)"], ["F3 (submit)"], ["F4 (negotiation)"], ["F5 (win)"], ["CANCEL"]] 
+  } else {
+    keyboardOptions = [["CANCEL"]]
+  }
 
   sendText(chatId, clientText, {
     keyboard: keyboardOptions,

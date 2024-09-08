@@ -1,19 +1,6 @@
-import {
-  ForceReply,
-  InlineKeyboardMarkup,
-  Message,
-  ReplyKeyboardMarkup,
-  ReplyKeyboardRemove,
-  Update,
-} from "@grammyjs/types";
+import { Update } from "@grammyjs/types";
 import { goToSelectCategory } from "./action";
-import {
-  getCustomerList,
-  getUserCache,
-  isRegisteredUser,
-  sendText,
-  updateUserCache,
-} from "./data_management";
+import { getUserCache, isRegisteredUser, sendText } from "./data_management";
 import {
   handleCreateCustomer,
   handleSelectCategory,
@@ -22,15 +9,7 @@ import {
   handleUpdateCustomer,
   handleUpdateProperty,
 } from "./handler";
-import {
-  CATEGORIES,
-  CATEGORY_LIST,
-  CustomerCategory,
-  CustomerProperty,
-  DoPostEvent,
-  PROPERTIES,
-  UserCache,
-} from "./types";
+import { DoPostEvent } from "./types";
 
 // Fungsi untuk menyetel webhook
 function setWebhook() {
@@ -39,6 +18,7 @@ function setWebhook() {
 }
 
 // Fungsi untuk menangani pesan yang masuk dari webhook
+// Entry point dari program ini
 function doPost(e: DoPostEvent): void {
   Logger.log(e.postData.getDataAsString());
   const update: Update = JSON.parse(e.postData.getDataAsString());
@@ -58,17 +38,14 @@ function doPost(e: DoPostEvent): void {
 
   // Mengecek apakah user terdaftar di Google Sheets
   if (!isRegisteredUser(chatId)) {
-    sendText(
-      chatId,
-      "Maaf " + fullName + ", Anda belum terdaftar. Hubungi admin untuk pendaftaran."
-    );
+    sendText(chatId, "Maaf " + fullName + ", Anda belum terdaftar. Hubungi admin untuk pendaftaran.");
     CacheService.getUserCache().remove(String(chatId));
     return;
   }
 
   switch (cache.userState) {
     case "select_category":
-      handleSelectCategory(incomingMessage, cache);
+      handleSelectCategory(incomingMessage);
       break;
     case "select_customer":
       handleSelectCustomer(incomingMessage, cache);
@@ -86,11 +63,9 @@ function doPost(e: DoPostEvent): void {
       handleUpdateProperty(incomingMessage, cache);
       break;
     default:
-      sendText(chatId, `Hai ${fullName}, Anda sudah terdaftar`)
-      goToSelectCategory(chatId)
+      sendText(chatId, `Hai ${fullName}, Anda sudah terdaftar`);
+      goToSelectCategory(chatId);
   }
 
   return;
 }
-
-

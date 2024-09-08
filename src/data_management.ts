@@ -1,20 +1,9 @@
 import {
-  ForceReply,
-  InlineKeyboardMarkup,
-  Message,
-  ReplyKeyboardMarkup,
-  ReplyKeyboardRemove,
-  Update,
-} from "@grammyjs/types";
-import {
-  CATEGORIES,
   CustomerCategory,
   CustomerData,
   CustomerProperty,
-  DoPostEvent,
   Funnel,
   MAP_PROPS_TO_COL,
-  PROPERTIES,
   ReplyMarkup,
   UserCache,
 } from "./types";

@@ -1,4 +1,4 @@
-import { CustomerCategory, CustomerData, CustomerProperty, MAP_PROPS_TO_TEXT } from "./types";
+import { CustomerCategory, CustomerData } from "./types";
 
 export function formatCustomerData(customerData: CustomerData): string {
   let formatText;

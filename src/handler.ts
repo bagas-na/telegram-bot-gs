@@ -1,11 +1,4 @@
-import {
-  ForceReply,
-  InlineKeyboardMarkup,
-  Message,
-  ReplyKeyboardMarkup,
-  ReplyKeyboardRemove,
-  Update,
-} from "@grammyjs/types";
+import { Message, Update } from "@grammyjs/types";
 import {
   getCustomerData,
   getCustomerList,
@@ -16,13 +9,10 @@ import {
 } from "./data_management";
 import {
   CATEGORIES,
-  CATEGORY_LIST,
   CustomerCategory,
   CustomerData,
   CustomerProperty,
-  DoPostEvent,
   PROPERTIES,
-  PROPERTIES_LIST,
   UserCache,
 } from "./types";
 
@@ -34,9 +24,11 @@ import {
   goToUpdateCustomer,
   goToUpdateProperty,
 } from "./action";
-import { formatCustomerData, formatPropertySelectionMenu } from "./texts";
+import { formatCustomerData } from "./texts";
 
-export function handleSelectCategory(message: Message & Update.NonChannel, cache: UserCache): void {
+
+
+export function handleSelectCategory(message: Message & Update.NonChannel): void {
   const chatId = message.chat.id;
   const chosenCategory = message.text ? message.text.toUpperCase() : null;
 
@@ -48,12 +40,19 @@ export function handleSelectCategory(message: Message & Update.NonChannel, cache
     );
     return;
   }
-  
-  // Mengambil daftar customer yang sesuai dengan chatId user, dan kategori pelanggan yang sudah dipilih
+
+  /**
+   * Jika input user (kategori) sesuai dengan pilihan yang ada (di dalam CATEGORIES):
+   *  1. Ambil daftar customer yang sesuai dengan chatId user dan kategori pelanggan
+   *     dan masukkan ke dalam customerList
+   *  2. Kemudian lakukan perintah tambahan (dalam fungsi goToSelectCustomer()), dan
+   *  3. Mengubah value dalam cache (dilakukan di dalam fungsi goToSelectCustomer()):
+   *      a. 'userState' -> "select_customer",
+   *      b. 'customer_category' -> sesuai pilihan (chose)
+   */ 
   const customerList = getCustomerList(chatId, chosenCategory as CustomerCategory);
 
   goToSelectCustomer(chatId, customerList, chosenCategory as CustomerCategory);
-
   return;
 }
 
@@ -91,7 +90,9 @@ export function handleSelectCustomer(message: Message & Update.NonChannel, cache
       break;
 
     default:
-      Logger.log("Invalid command. Entered '" + command + "'. Valid commands include 'NEW', 'UPDATE', and 'CANCEL");
+      Logger.log(
+        `Invalid command. Entered '${command}'. Valid commands include 'NEW', 'UPDATE', and 'CANCEL"`
+      );
   }
 }
 
@@ -157,156 +158,20 @@ export function handleSelectProperty(message: Message & Update.NonChannel, cache
   const customerName = cache.customer_name as string;
 
   // Jika input user tidak sesuai dengan pilihan, perintahkan untuk input kategori kembali
-  if (chosenProperty === null || !PROPERTIES.includes(chosenProperty as CustomerProperty)) {
+  if (chosenProperty === null || ![...PROPERTIES, "CANCEL"].includes(chosenProperty as CustomerProperty)) {
     sendText(chatId, "Pilihan tidak ditemukan");
     goToSelectProperty(chatId, category, null);
+    return;
   }
 
   const customerData = getCustomerData(chatId, category, customerName) as CustomerData;
-  let clientText = "";
 
-  switch (chosenProperty) {
-    case "submit_proposal":
-      clientText = "Status submit proposal untuk pelanggan ini adalah sebagai berikut:\n\n";
-      clientText += "Kategori: " + customerData.customer_category + "\n";
-      clientText += "Nama GC: " + customerData.name + "\n";
-      clientText += "Submit Proposal (sudah/belum): " + customerData.submit_proposal ? "sudah" : "belum" + "\n";
-      sendText(chatId, clientText);
-
-      clientText = "➡️ Klik pada tombol di bawah untuk mengubah status submit proposal.\n\n";
-      clientText += "➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
-      sendText(chatId, clientText, {
-        keyboard: [["SUDAH"], ["BELUM"], ["CANCEL"]],
-        one_time_keyboard: true,
-        resize_keyboard: true,
-      });
-
-      updateUserCache(chatId, { userState: "update_property", customer_property: chosenProperty });
-      break;
-    case "connectivity":
-      clientText = "Status opty connectivity untuk pelanggan ini adalah sebagai berikut:\n\n";
-      clientText += "Kategori: " + customerData.customer_category + "\n";
-      clientText += "Nama GC: " + customerData.name + "\n";
-      clientText += "Connectivity: " + customerData.connectivity + "\n";
-      sendText(chatId, clientText);
-
-      clientText = "➡️ Klik pada tombol di bawah untuk mengubah status opty connectivity.\n\n";
-      clientText += "➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
-      sendText(chatId, clientText, {
-        keyboard: [["F0 (lead)"], ["F3 (submit)"], ["F4 (negotiation)"], ["F5 (win)"], ["CANCEL"]],
-        one_time_keyboard: true,
-        resize_keyboard: true,
-      });
-
-      updateUserCache(chatId, { userState: "update_property", customer_property: chosenProperty });
-      break;
-    case "eazy":
-      clientText = "Status opty Antares Eazy untuk pelanggan ini adalah sebagai berikut:\n\n";
-      clientText += "Kategori: " + customerData.customer_category + "\n";
-      clientText += "Nama GC: " + customerData.name + "\n";
-      clientText += "Antares Eazy: " + customerData.eazy + "\n";
-      sendText(chatId, clientText);
-
-      clientText = "➡️ Klik pada tombol di bawah untuk mengubah status opty Antares Eazy.\n\n";
-      clientText += "➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
-      sendText(chatId, clientText, {
-        keyboard: [["F0 (lead)"], ["F3 (submit)"], ["F4 (negotiation)"], ["F5 (win)"], ["CANCEL"]],
-        one_time_keyboard: true,
-        resize_keyboard: true,
-      });
-
-      updateUserCache(chatId, { userState: "update_property", customer_property: chosenProperty });
-      break;
-    case "oca":
-      clientText = "Status opty OCA untuk pelanggan ini adalah sebagai berikut:\n\n";
-      clientText += "Kategori: " + customerData.customer_category + "\n";
-      clientText += "Nama GC: " + customerData.name + "\n";
-      clientText += "OCA: " + customerData.oca + "\n";
-      sendText(chatId, clientText);
-
-      clientText = "➡️ Klik pada tombol di bawah ini untuk mengubah status opty OCA.\n\n";
-      clientText += "➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
-      sendText(chatId, clientText, {
-        keyboard: [["F0 (lead)"], ["F3 (submit)"], ["F4 (negotiation)"], ["F5 (win)"], ["CANCEL"]],
-        one_time_keyboard: true,
-        resize_keyboard: true,
-      });
-
-      updateUserCache(chatId, { userState: "update_property", customer_property: chosenProperty });
-      break;
-    case "digiclinic":
-      clientText = "Status opty Digiclinic untuk pelanggan ini adalah sebagai berikut:\n\n";
-      clientText += "Kategori: " + customerData.customer_category + "\n";
-      clientText += "Nama GC: " + customerData.name + "\n";
-      clientText += "Digiclinic: " + customerData.digiclinic + "\n";
-      sendText(chatId, clientText);
-
-      clientText = "➡️ Klik pada tombol di bawah ini untuk mengubah status opty Digiclinic.\n\n";
-      clientText += "➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
-      sendText(chatId, clientText, {
-        keyboard: [["F0 (lead)"], ["F3 (submit)"], ["F4 (negotiation)"], ["F5 (win)"], ["CANCEL"]],
-        one_time_keyboard: true,
-        resize_keyboard: true,
-      });
-
-      updateUserCache(chatId, { userState: "update_property", customer_property: chosenProperty });
-      break;
-    case "pijar":
-      clientText = "Status opty Pijar untuk pelanggan ini adalah sebagai berikut:\n\n";
-      clientText += "Kategori: " + customerData.customer_category + "\n";
-      clientText += "Nama GC: " + customerData.name + "\n";
-      clientText += "Pijar: " + customerData.pijar + "\n";
-      sendText(chatId, clientText);
-
-      clientText = "➡️ Klik pada tombol di bawah ini untuk mengubah status opty Pijar.\n\n";
-      clientText += "➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
-      sendText(chatId, clientText, {
-        keyboard: [["F0 (lead)"], ["F3 (submit)"], ["F4 (negotiation)"], ["F5 (win)"], ["CANCEL"]],
-        one_time_keyboard: true,
-        resize_keyboard: true,
-      });
-
-      updateUserCache(chatId, { userState: "update_property", customer_property: chosenProperty });
-      break;
-    case "sprinthink":
-      clientText = "Status opty Sprinthink untuk pelanggan ini adalah sebagai berikut:\n\n";
-      clientText += "Kategori: " + customerData.customer_category + "\n";
-      clientText += "Nama GC: " + customerData.name + "\n";
-      clientText += "Sprinthink: " + customerData.sprinthink + "\n";
-      sendText(chatId, clientText);
-
-      clientText = "➡️ Klik pada tombol di bawah ini untuk mengubah status opty Sprinthink.\n\n";
-      clientText += "➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
-      sendText(chatId, clientText, {
-        keyboard: [["F0 (lead)"], ["F3 (submit)"], ["F4 (negotiation)"], ["F5 (win)"], ["CANCEL"]],
-        one_time_keyboard: true,
-        resize_keyboard: true,
-      });
-
-      updateUserCache(chatId, { userState: "update_property", customer_property: chosenProperty });
-      break;
-    case "nilai_project":
-      clientText = "Estimasi nilai proeject untuk pelanggan ini adalah sebagai berikut:\n\n";
-      clientText += "Kategori: " + customerData.customer_category + "\n";
-      clientText += "Nama GC: " + customerData.name + "\n";
-      clientText += "Nilai Project (Rp): " + customerData.nilai_project + "\n";
-      sendText(chatId, clientText);
-
-      clientText = "➡️ Masukkan estimasi nilai total proyek pada pelanggan ini.\n\n";
-      clientText += "➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya";
-      sendText(chatId, clientText, {
-        keyboard: [["CANCEL"]],
-        one_time_keyboard: true,
-        resize_keyboard: true,
-      });
-
-      updateUserCache(chatId, { userState: "update_property", customer_property: chosenProperty });
-      break;
-
-    case "CANCEL":
-      goToSelectProperty(chatId, category, customerData);
-      break;
+  if (chosenProperty === "CANCEL") {
+    goToSelectProperty(chatId, category, customerData);
+    return
   }
+
+  goToUpdateProperty(chatId, chosenProperty as CustomerProperty, customerData)
 }
 
 export function handleUpdateProperty(message: Message & Update.NonChannel, cache: UserCache): void {
@@ -378,7 +243,13 @@ export function handleUpdateProperty(message: Message & Update.NonChannel, cache
         // do nothing, kalau input bukan angka
         break;
       }
-      updateCustomerProperty(chatId, category, customerName, customerProperty, Number(propertyValue));
+      updateCustomerProperty(
+        chatId,
+        category,
+        customerName,
+        customerProperty,
+        Number(propertyValue)
+      );
 
       sendText(chatId, "Data " + customerProperty + " telah diubah.");
       customerData = getCustomerData(chatId, category, customerName) as CustomerData;
