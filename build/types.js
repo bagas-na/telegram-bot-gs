@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CATEGORY_LIST = exports.PROPERTIES = exports.CATEGORIES = void 0;
-exports.CATEGORIES = [
+export const CATEGORIES = [
     "RSUD",
     "PUSKESMAS",
     "SEKOLAH NEGERI",
@@ -10,7 +7,7 @@ exports.CATEGORIES = [
     "BAPENDA",
     "POLDA",
 ];
-exports.PROPERTIES = [
+export const PROPERTIES = [
     "submit_proposal",
     "connectivity",
     "eazy",
@@ -20,7 +17,7 @@ exports.PROPERTIES = [
     "sprinthink",
     "nilai_project",
 ];
-exports.CATEGORY_LIST = [
+export const CATEGORY_LIST = [
     ["RSUD"],
     ["PUSKESMAS"],
     ["SEKOLAH NEGERI"],
@@ -28,4 +25,14 @@ exports.CATEGORY_LIST = [
     ["SETDA"],
     ["BAPENDA"],
     ["POLDA"],
+];
+export const PROPERTIES_LIST = [
+    ["submit_proposal"],
+    ["connectivity"],
+    ["eazy"],
+    ["oca"],
+    ["digiclinic"],
+    ["pijar"],
+    ["sprinthink"],
+    ["nilai_project"],
 ];
