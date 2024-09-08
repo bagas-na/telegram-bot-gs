@@ -53,7 +53,6 @@ function doPost(e: DoPostEvent): void {
   const firstName = incomingMessage.chat.first_name;
   const lastName = incomingMessage.chat.last_name;
   const fullName = [firstName, lastName].join(" ").trim();
-  // const text = incomingMessage.text ? incomingMessage.text.toLowerCase() : "";
 
   const cache = getUserCache(chatId);
 
@@ -105,4 +104,4 @@ function doPost(e: DoPostEvent): void {
   return;
 }
 
-// Fungsi untuk menampilkan daftar customer berdasarkan kategori dan ID Telegram user
+
