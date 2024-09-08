@@ -1,5 +1,13 @@
 import { Message, Update } from "@grammyjs/types";
 import {
+  goToCreateCustomer,
+  goToSelectCategory,
+  goToSelectCustomer,
+  goToSelectProperty,
+  goToUpdateCustomer,
+  goToUpdateProperty,
+} from "./action";
+import {
   getCustomerData,
   getCustomerList,
   saveNewCustomer,
@@ -7,6 +15,7 @@ import {
   updateCustomerProperty,
   updateUserCache,
 } from "./data_management";
+import { formatCustomerData } from "./texts";
 import {
   CATEGORIES,
   CustomerCategory,
@@ -16,20 +25,11 @@ import {
   UserCache,
 } from "./types";
 
-import {
-  goToCreateCustomer,
-  goToSelectCategory,
-  goToSelectCustomer,
-  goToSelectProperty,
-  goToUpdateCustomer,
-  goToUpdateProperty,
-} from "./action";
-import { formatCustomerData } from "./texts";
-
-
-
+// Fungsi untuk menangani userState "select_category"
 export function handleSelectCategory(message: Message & Update.NonChannel): void {
   const chatId = message.chat.id;
+
+  // Mengambil pilihan user berdasarkan teks yang dikirim
   const chosenCategory = message.text ? message.text.toUpperCase() : null;
 
   // Jika input user tidak sesuai dengan pilihan, perintahkan untuk input kategori kembali
@@ -40,7 +40,6 @@ export function handleSelectCategory(message: Message & Update.NonChannel): void
     );
     return;
   }
-
   /**
    * Jika input user (kategori) sesuai dengan pilihan yang ada (di dalam CATEGORIES):
    *  1. Ambil daftar customer yang sesuai dengan chatId user dan kategori pelanggan
@@ -59,17 +58,20 @@ export function handleSelectCategory(message: Message & Update.NonChannel): void
 export function handleSelectCustomer(message: Message & Update.NonChannel, cache: UserCache): void {
   const category = cache.customer_category as CustomerCategory;
   const chatId = message.chat.id;
-  const text = message.text;
+
+  // Mengambil teks yg berisi [NEW atau UPDATE] dan [ANGKA atau NAMA GC]
+  const commandText = message.text;
 
   const list = getCustomerList(chatId, category);
   const customerList = list ? list.map((name) => name.toLowerCase()) : [];
 
-  if (text === undefined) {
+  if (commandText === undefined) {
     Logger.log("Message content is empty, exit from handleSelectCustomer()");
     return;
   }
 
-  const [command, ...args] = text.trim().split(" ");
+  // Memecah commandText menjadi command (NEW, UPDATE, CANCEL), dan customerName
+  const [command, ...args] = commandText.trim().split(" ");
   const customerName = args.join(" ").trim();
 
   if (customerName === "") {
@@ -80,15 +82,12 @@ export function handleSelectCustomer(message: Message & Update.NonChannel, cache
     case "NEW":
       caseSelectNewCustomer(chatId, category, customerList, customerName);
       break;
-
     case "UPDATE":
       caseSelectUpdateCustomer(chatId, category, customerList, customerName);
       break;
-
     case "CANCEL":
       goToSelectCategory(chatId);
       break;
-
     default:
       Logger.log(
         `Invalid command. Entered '${command}'. Valid commands include 'NEW', 'UPDATE', and 'CANCEL"`
@@ -134,7 +133,6 @@ export function handleUpdateCustomer(message: Message & Update.NonChannel, cache
   const category = cache.customer_category as CustomerCategory;
   const customerName = cache.customer_name as string;
 
-  let clientText = "";
   switch (choice) {
     case "YA":
       const customerData = getCustomerData(chatId, category, customerName) as CustomerData;
@@ -180,7 +178,6 @@ export function handleUpdateProperty(message: Message & Update.NonChannel, cache
   const customerName = cache.customer_name as string;
   const customerProperty = cache.customer_property as CustomerProperty;
   const propertyValue = message.text ? message.text.toUpperCase() : null; // true / false / F0 / F3 / F4 / F5 / number
-  let clientText: string;
   let customerData: CustomerData;
 
   if (propertyValue === null) {
@@ -267,9 +264,9 @@ function caseSelectNewCustomer(
 ): void {
   let clientText = "";
 
+  // Cek apabila nama pelanggan sudah ada dalam list
   if (!customerList.includes(customerName.toLowerCase())) {
-    // Nama pelanggan baru tidak duplikat dengan nama yang ada di daftar,
-    // konfirmasi pembuatan pelanggan baru
+    
     goToCreateCustomer(chatId, category, customerName);
   } else {
     const customerData = getCustomerData(chatId, category, customerName) as CustomerData;

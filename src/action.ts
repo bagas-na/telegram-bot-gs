@@ -36,8 +36,8 @@ export function goToSelectCustomer(
     /**
      * Jika customerList masih kosong, beri pesan bahwa kategori masih kosong
      * Kemudian, berikan pilihan:
-     *  YA untuk menambahkan pelanggan
-     *  TIDAK untuk memilih kategori pelanggan kembali
+     *   YA untuk menambahkan pelanggan
+     *   TIDAK untuk memilih kategori pelanggan kembali
      */
     sendText(chatId, "Kategori " + category + " masih kosong.");
 
