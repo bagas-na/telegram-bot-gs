@@ -12,6 +12,7 @@ import {
   getCustomerList,
   saveNewCustomer,
   sendText,
+  updateCustomerProperty,
   updateUserCache,
 } from "./data_management";
 import {
@@ -102,7 +103,7 @@ export function handleSelectCustomer(message: Message & Update.NonChannel, cache
   const text = message.text;
 
   const list = getCustomerList(chatId, category);
-  const customerList = list ? list.map((name) => name.toLocaleLowerCase()) : [];
+  const customerList = list ? list.map((name) => name.toLowerCase()) : [];
 
   if (text === undefined) {
     Logger.log("Message content is empty, exit from handleSelectCustomer()");
@@ -118,15 +119,27 @@ export function handleSelectCustomer(message: Message & Update.NonChannel, cache
 
   switch (command.toUpperCase()) {
     case "NEW":
-      caseNewCustomer(chatId, category, customerList, customerName);
+      caseSelectNewCustomer(chatId, category, customerList, customerName);
       break;
 
     case "UPDATE":
-      caseUpdateCustomer(chatId, category, customerList, customerName);
+      caseSelectUpdateCustomer(chatId, category, customerList, customerName);
+      break;
+
+    case "CANCEL":
+      let clientText = "**Silahkan pilih kategori pelanggan**\n";
+      clientText += "Langsung klik saja pada tombol yang muncul di bawah!";
+
+      sendText(chatId, clientText, {
+        keyboard: CATEGORY_LIST,
+        one_time_keyboard: true,
+        resize_keyboard: true,
+      });
+      updateUserCache(chatId, { userState: "is_selecting_category" });
       break;
 
     default:
-      Logger.log("Invalid command. Entered '" + command + "'. Valid commands include 'NEW' and 'UPDATE'");
+      Logger.log("Invalid command. Entered '" + command + "'. Valid commands include 'NEW', 'UPDATE', and 'CANCEL");
   }
 }
 
@@ -136,7 +149,7 @@ export function handleCreateCustomer(message: Message & Update.NonChannel, cache
   const category = cache.customer_category as CustomerCategory;
   const customerName = cache.customer_name as string;
 
-  let clientText: string;
+  let clientText: string = "";
 
   switch (choice) {
     case "YA":
@@ -233,7 +246,7 @@ export function handleUpdateCustomer(message: Message & Update.NonChannel, cache
   const category = cache.customer_category as CustomerCategory;
   const customerName = cache.customer_name as string;
 
-  let clientText: string;
+  let clientText = "";
   switch (choice) {
     case "YA":
       const customerData = getCustomerData(chatId, category, customerName) as CustomerData;
@@ -338,7 +351,7 @@ export function handleSelectProperty(message: Message & Update.NonChannel, cache
   }
 
   const customerData = getCustomerData(chatId, category, customerName) as CustomerData;
-  let clientText;
+  let clientText = "";
 
   switch (chosenProperty) {
     case "submit_proposal":
@@ -477,20 +490,212 @@ export function handleSelectProperty(message: Message & Update.NonChannel, cache
 
       updateUserCache(chatId, { userState: "update_property", customer_property: chosenProperty });
       break;
+
+    case "CANCEL":
+      clientText = "Berikut adalah data pelanggan saat ini.\n\n";
+      clientText += formatCustomerData(customerData);
+      sendText(chatId, clientText);
+
+      clientText = "**Silahkan pilih informasi GC yang ingin di diubah**\n";
+      clientText += "Langsung klik saja pada tombol yang muncul di bawah!\n\n";
+      (clientText += "**submit_proposal**, apakah proposal masif telah dikirimkan.\n\n"),
+        (clientText += "**connectivity**, status funneling layanan Datin/WMS/Indibiz/etc.\n\n"),
+        (clientText += "**eazy**, status funneling Antares Eazy.\n\n"),
+        (clientText += "**oca**, status funneling OCA.\n\n"),
+        (clientText += "**digiclinic**, status funenling Digiclinic.\n\n"),
+        (clientText += "**pijar**, status funneling ekosistem Pijar.\n\n"),
+        (clientText += "**sprinthink**, status funneling Sprinthink.\n\n"),
+        (clientText += "**nilai_project**, estimasi nilai project.\n\n"),
+        (clientText += "**CANCEL**, kembali ke daftar pelanggan untuk kategori " + category + ".");
+
+      sendText(chatId, clientText, {
+        keyboard: [...PROPERTIES_LIST, ["CANCEL"]],
+        one_time_keyboard: true,
+        resize_keyboard: true,
+      });
+
+      updateUserCache(chatId, { userState: "is_selecting_property" });
+      break;
   }
 }
 
-export function handleUpdateProperty(message: Message & Update.NonChannel, cache: UserCache): void {}
+export function handleUpdateProperty(message: Message & Update.NonChannel, cache: UserCache): void {
+  const chatId = message.chat.id;
+  const category = cache.customer_category as CustomerCategory;
+  const customerName = cache.customer_name as string;
+  const customerProperty = cache.customer_property as CustomerProperty;
+  const propertyValue = message.text ? message.text.toUpperCase() : null; // true / false / F0 / F3 / F4 / F5 / number
+  let clientText: string;
+  let customerData: CustomerData;
 
-function caseNewCustomer(
+  if (propertyValue === null) {
+    // do nothing
+    return;
+  }
+
+  if (propertyValue.toUpperCase() === "CANCEL") {
+    const customerData = getCustomerData(chatId, category, customerName) as CustomerData;
+
+    clientText = "Berikut adalah data pelanggan saat ini.\n\n";
+    clientText += formatCustomerData(customerData);
+    sendText(chatId, clientText);
+
+    clientText = "**Silahkan pilih informasi GC yang ingin di diubah**\n";
+    clientText += "Langsung klik saja pada tombol yang muncul di bawah!\n\n";
+    (clientText += "**submit_proposal**, apakah proposal masif telah dikirimkan.\n\n"),
+      (clientText += "**connectivity**, status funneling layanan Datin/WMS/Indibiz/etc.\n\n"),
+      (clientText += "**eazy**, status funneling Antares Eazy.\n\n"),
+      (clientText += "**oca**, status funneling OCA.\n\n"),
+      (clientText += "**digiclinic**, status funenling Digiclinic.\n\n"),
+      (clientText += "**pijar**, status funneling ekosistem Pijar.\n\n"),
+      (clientText += "**sprinthink**, status funneling Sprinthink.\n\n"),
+      (clientText += "**nilai_project**, estimasi nilai project.\n\n"),
+      (clientText += "**CANCEL**, kembali ke daftar pelanggan untuk kategori " + category + ".");
+
+    sendText(chatId, clientText, {
+      keyboard: [...PROPERTIES_LIST, ["CANCEL"]],
+      one_time_keyboard: true,
+      resize_keyboard: true,
+    });
+
+    updateUserCache(chatId, { userState: "is_selecting_property" });
+  }
+
+  switch (customerProperty) {
+    case "submit_proposal":
+      if (!["SUDAH", "BELUM"].includes(propertyValue)) {
+        // do nothing, kalau input tidak sesuai
+        break;
+      }
+
+      if (propertyValue === "SUDAH") {
+        updateCustomerProperty(chatId, category, customerName, customerProperty, true);
+      } else if (propertyValue === "BELUM") {
+        updateCustomerProperty(chatId, category, customerName, customerProperty, false);
+      }
+      sendText(chatId, "Data " + customerProperty + " telah diubah.");
+      customerData = getCustomerData(chatId, category, customerName) as CustomerData;
+
+      clientText = "Berikut adalah data pelanggan saat ini.\n\n";
+      clientText += formatCustomerData(customerData);
+      sendText(chatId, clientText);
+
+      clientText = "**Silahkan pilih informasi GC yang ingin di diubah**\n";
+      clientText += "Langsung klik saja pada tombol yang muncul di bawah!\n\n";
+      (clientText += "**submit_proposal**, apakah proposal masif telah dikirimkan.\n\n"),
+        (clientText += "**connectivity**, status funneling layanan Datin/WMS/Indibiz/etc.\n\n"),
+        (clientText += "**eazy**, status funneling Antares Eazy.\n\n"),
+        (clientText += "**oca**, status funneling OCA.\n\n"),
+        (clientText += "**digiclinic**, status funenling Digiclinic.\n\n"),
+        (clientText += "**pijar**, status funneling ekosistem Pijar.\n\n"),
+        (clientText += "**sprinthink**, status funneling Sprinthink.\n\n"),
+        (clientText += "**nilai_project**, estimasi nilai project.\n\n"),
+        (clientText += "**CANCEL**, kembali ke daftar pelanggan untuk kategori " + category + ".");
+
+      sendText(chatId, clientText, {
+        keyboard: [...PROPERTIES_LIST, ["CANCEL"]],
+        one_time_keyboard: true,
+        resize_keyboard: true,
+      });
+
+      updateUserCache(chatId, { userState: "is_selecting_property" });
+      break;
+
+    case "connectivity":
+    case "eazy":
+    case "oca":
+    case "digiclinic":
+    case "pijar":
+    case "sprinthink":
+      if (!["F0 (lead)", "F3 (submit)", "F4 (negotiation)", "F5 (win)"].includes(propertyValue)) {
+        // do nothing
+        break;
+      }
+
+      if (propertyValue === "F0 (lead)") {
+        updateCustomerProperty(chatId, category, customerName, customerProperty, "F0");
+      } else if (propertyValue === "F3 (submit)") {
+        updateCustomerProperty(chatId, category, customerName, customerProperty, "F3");
+      } else if (propertyValue === "F4 (negotiation)") {
+        updateCustomerProperty(chatId, category, customerName, customerProperty, "F4");
+      } else if (propertyValue === "F5 (win)") {
+        updateCustomerProperty(chatId, category, customerName, customerProperty, "F5");
+      }
+      sendText(chatId, "Data " + customerProperty + " telah diubah.");
+      customerData = getCustomerData(chatId, category, customerName) as CustomerData;
+
+      clientText = "Berikut adalah data pelanggan saat ini.\n\n";
+      clientText += formatCustomerData(customerData);
+      sendText(chatId, clientText);
+
+      clientText = "**Silahkan pilih informasi GC yang ingin di diubah**\n";
+      clientText += "Langsung klik saja pada tombol yang muncul di bawah!\n\n";
+      (clientText += "**submit_proposal**, apakah proposal masif telah dikirimkan.\n\n"),
+        (clientText += "**connectivity**, status funneling layanan Datin/WMS/Indibiz/etc.\n\n"),
+        (clientText += "**eazy**, status funneling Antares Eazy.\n\n"),
+        (clientText += "**oca**, status funneling OCA.\n\n"),
+        (clientText += "**digiclinic**, status funenling Digiclinic.\n\n"),
+        (clientText += "**pijar**, status funneling ekosistem Pijar.\n\n"),
+        (clientText += "**sprinthink**, status funneling Sprinthink.\n\n"),
+        (clientText += "**nilai_project**, estimasi nilai project.\n\n"),
+        (clientText += "**CANCEL**, kembali ke daftar pelanggan untuk kategori " + category + ".");
+
+      sendText(chatId, clientText, {
+        keyboard: [...PROPERTIES_LIST, ["CANCEL"]],
+        one_time_keyboard: true,
+        resize_keyboard: true,
+      });
+
+      updateUserCache(chatId, { userState: "is_selecting_property" });
+      break;
+
+    case "nilai_project":
+      const numberRegex = /^-?\d+(\.\d+)?$/;
+      if (!numberRegex.test(propertyValue)) {
+        // do nothing, kalau input bukan angka
+        break;
+      }
+      updateCustomerProperty(chatId, category, customerName, customerProperty, Number(propertyValue));
+
+      sendText(chatId, "Data " + customerProperty + " telah diubah.");
+      customerData = getCustomerData(chatId, category, customerName) as CustomerData;
+
+      clientText = "Berikut adalah data pelanggan saat ini.\n\n";
+      clientText += formatCustomerData(customerData);
+      sendText(chatId, clientText);
+
+      clientText = "**Silahkan pilih informasi GC yang ingin di diubah**\n";
+      clientText += "Langsung klik saja pada tombol yang muncul di bawah!\n\n";
+      (clientText += "**submit_proposal**, apakah proposal masif telah dikirimkan.\n\n"),
+        (clientText += "**connectivity**, status funneling layanan Datin/WMS/Indibiz/etc.\n\n"),
+        (clientText += "**eazy**, status funneling Antares Eazy.\n\n"),
+        (clientText += "**oca**, status funneling OCA.\n\n"),
+        (clientText += "**digiclinic**, status funenling Digiclinic.\n\n"),
+        (clientText += "**pijar**, status funneling ekosistem Pijar.\n\n"),
+        (clientText += "**sprinthink**, status funneling Sprinthink.\n\n"),
+        (clientText += "**nilai_project**, estimasi nilai project.\n\n"),
+        (clientText += "**CANCEL**, kembali ke daftar pelanggan untuk kategori " + category + ".");
+
+      sendText(chatId, clientText, {
+        keyboard: [...PROPERTIES_LIST, ["CANCEL"]],
+        one_time_keyboard: true,
+        resize_keyboard: true,
+      });
+
+      updateUserCache(chatId, { userState: "is_selecting_property" });
+      break;
+  }
+}
+
+function caseSelectNewCustomer(
   chatId: number,
   category: CustomerCategory,
   customerList: string[],
   customerName: string
 ): void {
-  let clientText;
+  let clientText = "";
 
-  if (!customerList.includes(customerName.toLocaleLowerCase())) {
+  if (!customerList.includes(customerName.toLowerCase())) {
     clientText = "**KONFIRMASI DATA**\n\n";
     clientText += "Apakah data pelanggan yang diinput ini sudah benar?\n";
     clientText += "------\n";
@@ -531,13 +736,13 @@ function caseNewCustomer(
   }
 }
 
-function caseUpdateCustomer(
+function caseSelectUpdateCustomer(
   chatId: number,
   category: CustomerCategory,
   customerList: string[],
   customerName: string
 ): void {
-  let clientText;
+  let clientText = "";
   const numberRegex = /^-?\d+(\.\d+)?$/; // Regex untuk menentukan apakah suatu string adalah angka
   const customerIndex = numberRegex.test(customerName) ? Number(customerName) : null;
 
@@ -576,7 +781,7 @@ function caseUpdateCustomer(
   }
 
   // Jika menggunakan nama customer, berikan konfirmasi terlebih dahulu
-  else if (customerList.includes(customerName.toLocaleLowerCase())) {
+  else if (customerList.includes(customerName.toLowerCase())) {
     const customerData = getCustomerData(chatId, category, customerName) as CustomerData;
 
     clientText = "Pelanggan dengan nama " + customerName + " sudah ada di dalam list.\n\n";

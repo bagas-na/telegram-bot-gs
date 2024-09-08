@@ -12,6 +12,7 @@ import {
   CustomerData,
   CustomerProperty,
   DoPostEvent,
+  Funnel,
   PROPERTIES,
   ReplyMarkup,
   UserCache,
@@ -39,6 +40,47 @@ export function getCustomerList(chatId: number, customerCategory: CustomerCatego
   }
 
   return customerList;
+}
+
+// Fungsi untuk mengambil data customer, return null jika tidak ditemukan
+export function getCustomerData(
+  chatId: number,
+  customerCategory: CustomerCategory,
+  customerName: string
+): CustomerData | null {
+  const sheetData = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
+  if (!sheetData) {
+    Logger.log("Cannot get customer list. Spreadsheet ID or sheet name does not exist");
+    return null;
+  }
+  const data = sheetData.getDataRange().getValues();
+
+  // Loop melalui data di sheet untuk mencari kecocokan ID Telegram, Kategori, dan Nama pelanggan
+  for (var i = 1; i < data.length; i++) {
+    const dataChatId: number = data[i][1]; // Kolom B (ID Telegram)
+    const dataCategory = data[i][3] as CustomerCategory; // Kolom D (Kategori)
+    const dataCustomerName: string = data[i][4]; // Kolom E (Nama Customer)
+    if (
+      String(dataChatId) === String(chatId) &&
+      dataCategory === customerCategory &&
+      dataCustomerName.toLowerCase() === customerName.toLowerCase()
+    ) {
+      return {
+        customer_category: dataCategory,
+        name: dataCustomerName,
+        submit_proposal: data[i][5], // Kolom F
+        connectivity: data[i][6], // Kolom G
+        eazy: data[i][7], // Kolom H
+        oca: data[i][8], // Kolom I
+        digiclinic: data[i][9], // Kolom J
+        pijar: data[i][10], // Kolom K
+        sprinthink: data[i][11], // Kolom L
+        nilai_project: data[i][12], // Kolom M
+      };
+    }
+  }
+
+  return null;
 }
 
 // Fungsi untuk menyimpan nama customer baru ke sheet
@@ -69,18 +111,24 @@ export function saveNewCustomer(chatId: number, customerCategory: CustomerCatego
   sheetData.getRange(lastRow, 13).setValue(0); // Nilai project
 }
 
-// Fungsi untuk mengambil data customer, return null jika tidak ditemukan
-export function getCustomerData(
+
+
+export function updateCustomerProperty(
   chatId: number,
   customerCategory: CustomerCategory,
-  customerName: string
-): CustomerData | null {
+  customerName: string,
+  customerProperty: CustomerProperty,
+  propertyValue: boolean | Funnel | number
+): void {
   const sheetData = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
   if (!sheetData) {
     Logger.log("Cannot get customer list. Spreadsheet ID or sheet name does not exist");
-    return null;
+    return;
   }
   const data = sheetData.getDataRange().getValues();
+
+  // Menyimpan letak barisan data customer tersimpan
+  let rowIndex: number = 0;
 
   // Loop melalui data di sheet untuk mencari kecocokan ID Telegram, Kategori, dan Nama pelanggan
   for (var i = 1; i < data.length; i++) {
@@ -89,59 +137,54 @@ export function getCustomerData(
     const dataCustomerName: string = data[i][4]; // Kolom E (Nama Customer)
     if (
       String(dataChatId) === String(chatId) &&
-      dataCategory === customerCategory &&
-      dataCustomerName.toLocaleLowerCase() === customerName.toLocaleLowerCase()
+      dataCategory.toUpperCase() === customerCategory.toUpperCase() &&
+      dataCustomerName.toLowerCase() === customerName.toLowerCase()
     ) {
-      return {
-        customer_category: dataCategory,
-        name: dataCustomerName,
-        submit_proposal: data[i][5], // Kolom F
-        connectivity: data[i][6], // Kolom G
-        eazy: data[i][7], // Kolom H
-        oca: data[i][8], // Kolom I
-        digiclinic: data[i][9], // Kolom J
-        pijar: data[i][10], // Kolom K
-        sprinthink: data[i][11], // Kolom L
-        nilai_project: data[i][12], // Kolom M
-      };
+      rowIndex = i + 1;
     }
   }
 
-  return null;
-}
+  if (rowIndex === 0) {
+    Logger.log(
+      "Customer with id_tele: " +
+        chatId +
+        ", kategori: " +
+        customerCategory +
+        ", and name: " +
+        customerName +
+        " does not exist."
+    );
+    return;
+  }
 
-export function formatCustomerData(customerData: CustomerData): string {
-  let formatText = "------\n";
-  formatText += "Kategori: " + customerData.customer_category + "\n";
-  formatText += "Nama GC: " + customerData.name + "\n";
-  formatText += "Submit Proposal (sudah/belum): " + customerData.submit_proposal ? "sudah" : "belum" + "\n";
-  formatText += "Connectivity: " + customerData.connectivity + "\n";
-  formatText += "Antares Eazy: " + customerData.eazy + "\n";
-  formatText += "OCA: " + customerData.oca + "\n";
-  formatText += "Digiclinic: " + customerData.digiclinic + "\n";
-  formatText += "Pijar: " + customerData.pijar + "\n";
-  formatText += "Sprinthink: " + customerData.sprinthink + "\n";
-  formatText += "Nilai Project (Rp): " + customerData.nilai_project + "\n";
-  formatText += "------\n";
+  switch (customerProperty) {
+    case "submit_proposal":
+      sheetData.getRange(rowIndex, 6).setValue(propertyValue); // Submit proposal
+      break;
+    case "connectivity":
+      sheetData.getRange(rowIndex, 7).setValue(propertyValue); // connectivity
+      break;
+    case "eazy":
+      sheetData.getRange(rowIndex, 8).setValue(propertyValue); // eazy
+      break;
+    case "oca":
+      sheetData.getRange(rowIndex, 9).setValue(propertyValue); // oca
+      break;
+    case "digiclinic":
+      sheetData.getRange(rowIndex, 10).setValue(propertyValue); // digiclinic
+      break;
+    case "pijar":
+      sheetData.getRange(rowIndex, 11).setValue(propertyValue); // pijar
+      break;
+    case "sprinthink":
+      sheetData.getRange(rowIndex, 12).setValue(propertyValue); // sprinthink
+      break;
+    case "nilai_project":
+      sheetData.getRange(rowIndex, 13).setValue(propertyValue); // nilai_project
+      break;
+  }
 
-  return formatText;
-}
-
-// Fungsi untuk mengirim teks ke chat dengan markup keyboard
-export function sendText(chatId: number, text: string, replyMarkup?: ReplyMarkup): void {
-  const data: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
-    method: "post",
-    payload: {
-      method: "sendMessage",
-      chat_id: String(chatId),
-      text: text,
-      parse_mode: "HTML",
-      reply_markup: JSON.stringify(replyMarkup || {}), // Memastikan replyMarkup dikirim dengan benar
-    },
-  };
-
-  // Mengirim request ke API Telegram
-  UrlFetchApp.fetch(`${TELEGRAM_API_URL}${TOKEN}/sendMessage`, data);
+  return;
 }
 
 // Fungsi untuk mengecek apakah user terdaftar di Google Sheets
@@ -181,6 +224,40 @@ export function getRegisteredUserName(chatId: number): string | null {
   }
 
   return null;
+}
+
+// Fungsi untuk mengirim teks ke chat dengan markup keyboard
+export function sendText(chatId: number, text: string, replyMarkup?: ReplyMarkup): void {
+  const data: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
+    method: "post",
+    payload: {
+      method: "sendMessage",
+      chat_id: String(chatId),
+      text: text,
+      parse_mode: "HTML",
+      reply_markup: JSON.stringify(replyMarkup || {}), // Memastikan replyMarkup dikirim dengan benar
+    },
+  };
+
+  // Mengirim request ke API Telegram
+  UrlFetchApp.fetch(`${TELEGRAM_API_URL}${TOKEN}/sendMessage`, data);
+}
+
+export function formatCustomerData(customerData: CustomerData): string {
+  let formatText = "------\n";
+  formatText += "Kategori: " + customerData.customer_category + "\n";
+  formatText += "Nama GC: " + customerData.name + "\n";
+  formatText += "Submit Proposal (sudah/belum): " + customerData.submit_proposal ? "sudah" : "belum" + "\n";
+  formatText += "Connectivity: " + customerData.connectivity + "\n";
+  formatText += "Antares Eazy: " + customerData.eazy + "\n";
+  formatText += "OCA: " + customerData.oca + "\n";
+  formatText += "Digiclinic: " + customerData.digiclinic + "\n";
+  formatText += "Pijar: " + customerData.pijar + "\n";
+  formatText += "Sprinthink: " + customerData.sprinthink + "\n";
+  formatText += "Nilai Project (Rp): " + customerData.nilai_project + "\n";
+  formatText += "------\n";
+
+  return formatText;
 }
 
 export function getUserCache(chatId: number): UserCache {

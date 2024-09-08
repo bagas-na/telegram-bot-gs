@@ -24,6 +24,7 @@ import {
 } from "./handler";
 import {
   CATEGORIES,
+  CATEGORY_LIST,
   CustomerCategory,
   CustomerProperty,
   DoPostEvent,
@@ -89,17 +90,12 @@ function doPost(e: DoPostEvent): void {
       handleUpdateProperty(incomingMessage, cache);
       break;
     default:
-      let categoryList: string[][] = [];
-      for (let i = 0; i < CATEGORIES.length; i++) {
-        categoryList.push([CATEGORIES[i]]);
-      }
-
       let clientText = "Hai " + fullName + ", Anda sudah terdaftar.\n\n";
       clientText += "**Silahkan pilih kategori pelanggan**\n";
       clientText += "Langsung klik saja pada tombol yang muncul di bawah!";
 
       sendText(chatId, clientText, {
-        keyboard: categoryList,
+        keyboard: CATEGORY_LIST,
         one_time_keyboard: true,
         resize_keyboard: true,
       });
