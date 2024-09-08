@@ -1,19 +1,6 @@
-import {
-  ForceReply,
-  InlineKeyboardMarkup,
-  ReplyKeyboardMarkup,
-  ReplyKeyboardRemove,
-} from "@grammyjs/types";
+import { ForceReply, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove } from "@grammyjs/types";
 
-export const CATEGORIES = [
-  "RSUD",
-  "PUSKESMAS",
-  "SEKOLAH NEGERI",
-  "DINAS",
-  "SETDA",
-  "BAPENDA",
-  "POLDA",
-] as const;
+export const CATEGORIES = ["RSUD", "PUSKESMAS", "SEKOLAH NEGERI", "DINAS", "SETDA", "BAPENDA", "POLDA"] as const;
 
 export const PROPERTIES = [
   "submit_proposal",
@@ -28,11 +15,7 @@ export const PROPERTIES = [
 
 export type CustomerCategory = (typeof CATEGORIES)[number];
 export type CustomerProperty = (typeof PROPERTIES)[number];
-export type ReplyMarkup =
-  | InlineKeyboardMarkup
-  | ReplyKeyboardMarkup
-  | ReplyKeyboardRemove
-  | ForceReply;
+export type ReplyMarkup = InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply;
 export type UserCache = {
   userState:
     | "is_selecting_category"
@@ -44,7 +27,6 @@ export type UserCache = {
     | "is_selecting_property"
     | "update_property";
   customer_category?: CustomerCategory; // untuk state is_selecting_customer dan seterusnya
-  customer_list?: string[] | null; // untuk menentukan nomor urut di update_customer dan delete_customer
   customer_name?: string | null; // untuk menyimpan nama pelanggan di is_selecting_property dan update_property
   customer_property?: CustomerProperty | null;
 };
@@ -90,3 +72,25 @@ export const PROPERTIES_LIST: CustomerProperty[][] = [
   ["sprinthink"],
   ["nilai_project"],
 ];
+
+export const MAP_PROPS_TO_COL = {
+  submit_proposal: 6,
+  connectivity: 7,
+  eazy: 8,
+  oca: 9,
+  digiclinic: 10,
+  pijar: 11,
+  sprinthink: 12,
+  nilai_project: 13,
+};
+
+export const MAP_COL_TO_PROPS = {
+  "6": "submit_proposal",
+  "7": "connectivity",
+  "8": "eazy",
+  "9": "oca",
+  "10": "digiclinic",
+  "11": "pijar",
+  "12": "sprinthink",
+  "13": "nilai_project",
+};
