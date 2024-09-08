@@ -13,21 +13,21 @@ export const PROPERTIES = [
   "nilai_project",
 ] as const;
 
+export const FUNNEL_PROPERTIES = ["connectivity", "eazy", "oca", "digiclinic", "pijar", "sprinthink"];
+
 export type CustomerCategory = (typeof CATEGORIES)[number];
 export type CustomerProperty = (typeof PROPERTIES)[number];
 export type ReplyMarkup = InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply;
 export type UserCache = {
   userState:
-    | "is_selecting_category"
-    | "empty_category"
-    | "is_selecting_customer"
+    | "select_category"
+    | "select_customer"
     | "create_customer"
     | "update_customer"
-    | "rename_customer"
-    | "is_selecting_property"
+    | "select_property"
     | "update_property";
-  customer_category?: CustomerCategory; // untuk state is_selecting_customer dan seterusnya
-  customer_name?: string | null; // untuk menyimpan nama pelanggan di is_selecting_property dan update_property
+  customer_category?: CustomerCategory; // untuk state select_customer dan seterusnya
+  customer_name?: string | null; // untuk menyimpan nama pelanggan di select_property dan update_property
   customer_property?: CustomerProperty | null;
 };
 
@@ -60,7 +60,7 @@ export const CATEGORY_LIST: CustomerCategory[][] = [
   ["SETDA"],
   ["BAPENDA"],
   ["POLDA"],
-];
+] as const;
 
 export const PROPERTIES_LIST: CustomerProperty[][] = [
   ["submit_proposal"],
@@ -71,9 +71,9 @@ export const PROPERTIES_LIST: CustomerProperty[][] = [
   ["pijar"],
   ["sprinthink"],
   ["nilai_project"],
-];
+] as const;
 
-export const MAP_PROPS_TO_COL = {
+export const MAP_PROPS_TO_COL: { [key in CustomerProperty]: number } = {
   submit_proposal: 6,
   connectivity: 7,
   eazy: 8,
@@ -82,9 +82,20 @@ export const MAP_PROPS_TO_COL = {
   pijar: 11,
   sprinthink: 12,
   nilai_project: 13,
-};
+} as const;
 
-export const MAP_COL_TO_PROPS = {
+export const MAP_PROPS_TO_TEXT: { [key in CustomerProperty]: string } = {
+  submit_proposal: "Submit Proposal",
+  connectivity: "Connectivity",
+  eazy: "Antares Eazy",
+  oca: "OCA",
+  digiclinic: "DIGIClinic",
+  pijar: "Pijar",
+  sprinthink: "Sprinthink",
+  nilai_project: "Nilai proyek",
+} as const;
+
+export const MAP_COL_TO_PROPS: { [key: number]: CustomerProperty } = {
   "6": "submit_proposal",
   "7": "connectivity",
   "8": "eazy",
@@ -93,4 +104,4 @@ export const MAP_COL_TO_PROPS = {
   "11": "pijar",
   "12": "sprinthink",
   "13": "nilai_project",
-};
+} as const;

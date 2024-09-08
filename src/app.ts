@@ -6,6 +6,7 @@ import {
   ReplyKeyboardRemove,
   Update,
 } from "@grammyjs/types";
+import { goToSelectCategory } from "./action";
 import {
   getCustomerList,
   getUserCache,
@@ -15,7 +16,6 @@ import {
 } from "./data_management";
 import {
   handleCreateCustomer,
-  handleRenameCustomer,
   handleSelectCategory,
   handleSelectCustomer,
   handleSelectProperty,
@@ -67,10 +67,10 @@ function doPost(e: DoPostEvent): void {
   }
 
   switch (cache.userState) {
-    case "is_selecting_category":
+    case "select_category":
       handleSelectCategory(incomingMessage, cache);
       break;
-    case "is_selecting_customer":
+    case "select_customer":
       handleSelectCustomer(incomingMessage, cache);
       break;
     case "create_customer":
@@ -79,26 +79,15 @@ function doPost(e: DoPostEvent): void {
     case "update_customer":
       handleUpdateCustomer(incomingMessage, cache);
       break;
-    case "rename_customer":
-      handleRenameCustomer(incomingMessage, cache);
-      break;
-    case "is_selecting_property":
+    case "select_property":
       handleSelectProperty(incomingMessage, cache);
       break;
     case "update_property":
       handleUpdateProperty(incomingMessage, cache);
       break;
     default:
-      let clientText = "Hai " + fullName + ", Anda sudah terdaftar.\n\n";
-      clientText += "**Silahkan pilih kategori pelanggan**\n";
-      clientText += "Langsung klik saja pada tombol yang muncul di bawah!";
-
-      sendText(chatId, clientText, {
-        keyboard: CATEGORY_LIST,
-        one_time_keyboard: true,
-        resize_keyboard: true,
-      });
-      updateUserCache(chatId, { userState: "is_selecting_category" });
+      sendText(chatId, `Hai ${fullName}, Anda sudah terdaftar`)
+      goToSelectCategory(chatId)
   }
 
   return;

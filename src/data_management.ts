@@ -13,6 +13,7 @@ import {
   CustomerProperty,
   DoPostEvent,
   Funnel,
+  MAP_PROPS_TO_COL,
   PROPERTIES,
   ReplyMarkup,
   UserCache,
@@ -94,6 +95,32 @@ export function saveNewCustomer(chatId: number, customerCategory: CustomerCatego
 
   const namaAM = getRegisteredUserName(chatId);
 
+  const defaultSubmitProposal = false;
+  const defaultConnectivity = "F0";
+  const defaultEazy = "F0";
+  const defaultOCA = "F0";
+  const defaultDigiclinic = "F0";
+  const defaultPijar = "F0";
+  const defaultSprinthink = "F0";
+  const defaultNilaiProyek = 0;
+
+  const value = [
+    chatId,
+    namaAM,
+    customerCategory,
+    customerName,
+    defaultSubmitProposal,
+    defaultConnectivity,
+    defaultEazy,
+    defaultOCA,
+    defaultDigiclinic,
+    defaultPijar,
+    defaultSprinthink,
+    defaultNilaiProyek,
+  ];
+
+  sheetData.getRange(lastRow, 2, 1, value.length).setValues([value]);
+
   // Menyimpan ID Telegram dan kategori ke sheet
   sheetData.getRange(lastRow, 2).setValue(chatId); // Kolom B
   sheetData.getRange(lastRow, 3).setValue(namaAM); // Kolom C
@@ -110,8 +137,6 @@ export function saveNewCustomer(chatId: number, customerCategory: CustomerCatego
   sheetData.getRange(lastRow, 12).setValue("F0"); // Sprinthink
   sheetData.getRange(lastRow, 13).setValue(0); // Nilai project
 }
-
-
 
 export function updateCustomerProperty(
   chatId: number,
@@ -146,43 +171,16 @@ export function updateCustomerProperty(
 
   if (rowIndex === 0) {
     Logger.log(
-      "Customer with id_tele: " +
-        chatId +
-        ", kategori: " +
-        customerCategory +
-        ", and name: " +
-        customerName +
-        " does not exist."
+      `Customer with id_tele: ${chatId}, kategori: ${customerCategory}, and name: ${customerName} does not exist.`
     );
     return;
   }
 
-  switch (customerProperty) {
-    case "submit_proposal":
-      sheetData.getRange(rowIndex, 6).setValue(propertyValue); // Submit proposal
-      break;
-    case "connectivity":
-      sheetData.getRange(rowIndex, 7).setValue(propertyValue); // connectivity
-      break;
-    case "eazy":
-      sheetData.getRange(rowIndex, 8).setValue(propertyValue); // eazy
-      break;
-    case "oca":
-      sheetData.getRange(rowIndex, 9).setValue(propertyValue); // oca
-      break;
-    case "digiclinic":
-      sheetData.getRange(rowIndex, 10).setValue(propertyValue); // digiclinic
-      break;
-    case "pijar":
-      sheetData.getRange(rowIndex, 11).setValue(propertyValue); // pijar
-      break;
-    case "sprinthink":
-      sheetData.getRange(rowIndex, 12).setValue(propertyValue); // sprinthink
-      break;
-    case "nilai_project":
-      sheetData.getRange(rowIndex, 13).setValue(propertyValue); // nilai_project
-      break;
+  if (!MAP_PROPS_TO_COL[customerProperty]) {
+    Logger.log(`Property ${customerProperty} does not exist.`);
   }
+
+  sheetData.getRange(rowIndex, MAP_PROPS_TO_COL[customerProperty]).setValue(propertyValue);
 
   return;
 }
@@ -243,23 +241,6 @@ export function sendText(chatId: number, text: string, replyMarkup?: ReplyMarkup
   UrlFetchApp.fetch(`${TELEGRAM_API_URL}${TOKEN}/sendMessage`, data);
 }
 
-export function formatCustomerData(customerData: CustomerData): string {
-  let formatText = "------\n";
-  formatText += "Kategori: " + customerData.customer_category + "\n";
-  formatText += "Nama GC: " + customerData.name + "\n";
-  formatText += "Submit Proposal (sudah/belum): " + customerData.submit_proposal ? "sudah" : "belum" + "\n";
-  formatText += "Connectivity: " + customerData.connectivity + "\n";
-  formatText += "Antares Eazy: " + customerData.eazy + "\n";
-  formatText += "OCA: " + customerData.oca + "\n";
-  formatText += "Digiclinic: " + customerData.digiclinic + "\n";
-  formatText += "Pijar: " + customerData.pijar + "\n";
-  formatText += "Sprinthink: " + customerData.sprinthink + "\n";
-  formatText += "Nilai Project (Rp): " + customerData.nilai_project + "\n";
-  formatText += "------\n";
-
-  return formatText;
-}
-
 export function getUserCache(chatId: number): UserCache {
   const rawCache = CacheService.getUserCache().get(String(chatId));
   const cache: UserCache = rawCache ? JSON.parse(rawCache) : {};
@@ -272,14 +253,4 @@ export function updateUserCache(chatId: number, updateCache: UserCache): void {
 
   const newCache = { ...oldCache, ...updateCache };
   CacheService.getUserCache().put(String(chatId), JSON.stringify(newCache));
-}
-
-// Fungsi untuk mendapatkan kategori yang dipilih oleh user
-function getSelectedCategory(chatId: number) {
-  return CacheService.getUserCache().get(chatId + "_category") || "";
-}
-
-// Fungsi untuk memperbarui kategori pelanggan dan ID Telegram
-function updateCategory(chatId: number, category: CustomerCategory) {
-  CacheService.getUserCache().put(chatId + "_category", category); // Simpan kategori sementara di cache
 }
