@@ -1,21 +1,20 @@
 import { Message, Update } from "@grammyjs/types";
 import {
-  goToCreateCustomer,
-  goToSelectCategory,
-  goToSelectCustomer,
-  goToSelectProperty,
-  goToUpdateCustomer,
-  goToUpdateProperty,
-} from "./action";
-import {
   getCustomerData,
   getCustomerList,
   saveNewCustomer,
   sendText,
   updateCustomerProperty,
   updateUserCache,
-} from "./data_management";
-import { formatCustomerData } from "./texts";
+} from "./data/googleSheets";
+import {
+  goToCreateCustomer,
+  goToSelectCategory,
+  goToSelectCustomer,
+  goToSelectProperty,
+  goToUpdateCustomer,
+  goToUpdateProperty,
+} from "./stateTransitions";
 import {
   CATEGORIES,
   CustomerCategory,
@@ -24,6 +23,7 @@ import {
   PROPERTIES,
   UserCache,
 } from "./types";
+import { formatCustomerData } from "./utils";
 
 // Fungsi untuk menangani userState "select_category"
 export function handleSelectCategory(message: Message & Update.NonChannel): void {

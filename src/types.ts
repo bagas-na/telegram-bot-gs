@@ -37,12 +37,12 @@ export type CustomerData = {
   sprinthink: Funnel;
   nilai_project: number;
 };
-export interface MyPostData extends GoogleAppsScript.Events.AppsScriptHttpRequestEventPostData {
-  getDataAsString(): string;
-}
-export interface DoPostEvent extends GoogleAppsScript.Events.DoPost {
-  postData: MyPostData;
-}
+// export interface MyPostData extends GoogleAppsScript.Events.AppsScriptHttpRequestEventPostData {
+//   getDataAsString(): string;
+// }
+// export interface DoPostEvent extends GoogleAppsScript.Events.DoPost {
+//   postData: MyPostData;
+// }
 
 export const CATEGORIES = [
   "RSUD",

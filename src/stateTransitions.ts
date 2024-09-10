@@ -1,5 +1,4 @@
-import { sendText, updateUserCache } from "./data_management";
-import { formatCustomerData, formatPropertySelectionMenu } from "./texts";
+import { sendText, updateUserCache } from "./data/googleSheets";
 import {
   CATEGORY_LIST,
   CustomerCategory,
@@ -9,6 +8,7 @@ import {
   MAP_PROPS_TO_TEXT,
   PROPERTIES_LIST,
 } from "./types";
+import { formatCustomerData, formatPropertySelectionMenu } from "./utils";
 
 // Fungsi yang dijalankan sebelum mengubah userState menjadi "select_category"
 export function goToSelectCategory(chatId: number, customText?: string): void {
