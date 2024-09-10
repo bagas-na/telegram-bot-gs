@@ -1,9 +1,21 @@
 {
-  "devDependencies": {
-    "@types/google-apps-script": "^1.0.83",
-    "typescript": "^5.5.4"
+  "name": "telegram-bot-gs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "test": "vitest",
+    "cf-typegen": "wrangler types"
   },
-  "dependencies": {
-    "@grammyjs/types": "^3.14.0"
+  "devDependencies": {
+    "@grammyjs/types": "^3.14.0",
+    "@types/google-apps-script": "^1.0.83",
+    "@cloudflare/vitest-pool-workers": "^0.4.5",
+    "@cloudflare/workers-types": "^4.20240903.0",
+    "typescript": "^5.5.2",
+    "vitest": "1.5.0",
+    "wrangler": "^3.60.3"
   }
 }
