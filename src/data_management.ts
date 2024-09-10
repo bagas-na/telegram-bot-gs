@@ -1,3 +1,4 @@
+import { Message } from "@grammyjs/types";
 import {
   CustomerCategory,
   CustomerData,
@@ -8,10 +9,16 @@ import {
   UserCache,
 } from "./types";
 
-export function getCustomerList(chatId: number, customerCategory: CustomerCategory): string[] | null {
-  const sheetData = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
+export function getCustomerList(
+  chatId: number,
+  customerCategory: CustomerCategory
+): string[] | null {
+  const sheetData =
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
   if (!sheetData) {
-    Logger.log("Cannot get customer list. Spreadsheet ID or sheet name does not exist");
+    Logger.log(
+      "Cannot get customer list. Spreadsheet ID or sheet name does not exist"
+    );
     return null;
   }
   const data = sheetData.getDataRange().getValues();
@@ -24,7 +31,11 @@ export function getCustomerList(chatId: number, customerCategory: CustomerCatego
     const dataCustomerName: string = data[i][4]; // Kolom E (Nama Customer)
 
     // Cek kecocokan ID Telegram dan Kategori
-    if (String(dataChatId) === String(chatId) && dataCategory === customerCategory && dataCustomerName !== "") {
+    if (
+      String(dataChatId) === String(chatId) &&
+      dataCategory === customerCategory &&
+      dataCustomerName !== ""
+    ) {
       customerList.push(dataCustomerName); // Tambahkan indeks dan nama customer yang cocok ke daftar
     }
   }
@@ -38,9 +49,12 @@ export function getCustomerData(
   customerCategory: CustomerCategory,
   customerName: string
 ): CustomerData | null {
-  const sheetData = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
+  const sheetData =
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
   if (!sheetData) {
-    Logger.log("Cannot get customer list. Spreadsheet ID or sheet name does not exist");
+    Logger.log(
+      "Cannot get customer list. Spreadsheet ID or sheet name does not exist"
+    );
     return null;
   }
   const data = sheetData.getDataRange().getValues();
@@ -74,10 +88,17 @@ export function getCustomerData(
 }
 
 // Fungsi untuk menyimpan nama customer baru ke sheet
-export function saveNewCustomer(chatId: number, customerCategory: CustomerCategory, customerName: string): void {
-  const sheetData = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
+export function saveNewCustomer(
+  chatId: number,
+  customerCategory: CustomerCategory,
+  customerName: string
+): void {
+  const sheetData =
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
   if (!sheetData) {
-    Logger.log("Cannot save customer data. Spreadsheet ID or sheet name does not exist");
+    Logger.log(
+      "Cannot save customer data. Spreadsheet ID or sheet name does not exist"
+    );
     return;
   }
   const lastRow = sheetData.getLastRow() + 1;
@@ -134,9 +155,12 @@ export function updateCustomerProperty(
   customerProperty: CustomerProperty,
   propertyValue: boolean | Funnel | number
 ): void {
-  const sheetData = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
+  const sheetData =
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_DATA);
   if (!sheetData) {
-    Logger.log("Cannot get customer list. Spreadsheet ID or sheet name does not exist");
+    Logger.log(
+      "Cannot get customer list. Spreadsheet ID or sheet name does not exist"
+    );
     return;
   }
   const data = sheetData.getDataRange().getValues();
@@ -169,16 +193,21 @@ export function updateCustomerProperty(
     Logger.log(`Property ${customerProperty} does not exist.`);
   }
 
-  sheetData.getRange(rowIndex, MAP_PROPS_TO_COL[customerProperty]).setValue(propertyValue);
+  sheetData
+    .getRange(rowIndex, MAP_PROPS_TO_COL[customerProperty])
+    .setValue(propertyValue);
 
   return;
 }
 
 // Fungsi untuk mengecek apakah user terdaftar di Google Sheets
 export function isRegisteredUser(chatId: number): boolean {
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_REFERENSI);
+  const sheet =
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_REFERENSI);
   if (!sheet) {
-    Logger.log("Cannot check if user is Registered. Spreadsheet ID or sheet name does not exist");
+    Logger.log(
+      "Cannot check if user is Registered. Spreadsheet ID or sheet name does not exist"
+    );
     return false;
   }
 
@@ -195,9 +224,12 @@ export function isRegisteredUser(chatId: number): boolean {
 }
 
 export function getRegisteredUserName(chatId: number): string | null {
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_REFERENSI);
+  const sheet =
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_REFERENSI);
   if (!sheet) {
-    Logger.log("Cannot check name of registered user. Spreadsheet ID or sheet name does not exist");
+    Logger.log(
+      "Cannot check name of registered user. Spreadsheet ID or sheet name does not exist"
+    );
     return null;
   }
 
@@ -214,32 +246,68 @@ export function getRegisteredUserName(chatId: number): string | null {
 }
 
 // Fungsi untuk mengirim teks ke chat dengan markup keyboard
-export function sendText(chatId: number, text: string, replyMarkup?: ReplyMarkup): void {
-  const data: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
-    method: "post",
-    payload: {
-      method: "sendMessage",
-      chat_id: String(chatId),
-      text: text,
-      parse_mode: "HTML",
-      reply_markup: JSON.stringify(replyMarkup || {}), // Memastikan replyMarkup dikirim dengan benar
-    },
+export async function sendMessage(
+  env: Env,
+  chatId: number,
+  text: string,
+  replyMarkup?: ReplyMarkup
+): Promise<Response> {
+  const apiMethod = "/sendMessage";
+  const Url = env.TELEGRAM_API_URL + env.BOT_TOKEN + apiMethod;
+
+  const messageBody = {
+    chat_id: chatId,
+    text,
+    replyMarkup,
   };
 
-  // Mengirim request ke API Telegram
-  UrlFetchApp.fetch(`${TELEGRAM_API_URL}${TOKEN}/sendMessage`, data);
+  const options: RequestInit = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(messageBody),
+  };
+
+  return await fetch(Url, options);
 }
 
-export function getUserCache(chatId: number): UserCache {
-  const rawCache = CacheService.getUserCache().get(String(chatId));
-  const cache: UserCache = rawCache ? JSON.parse(rawCache) : {};
+export async function getUserCache(
+  env: Env,
+  chatId: number
+): Promise<UserCache | null> {
+  const stmt = env.DATABASE.prepare(
+    "SELECT * FROM users WHERE telegram_id = ?1"
+  );
+  const cache = await stmt.bind(chatId).first<UserCache>();
 
   return cache;
 }
 
-export function updateUserCache(chatId: number, updateCache: UserCache): void {
-  const oldCache = getUserCache(chatId);
+export async function updateUserCache(
+  env: Env,
+  chatId: number,
+  updateCache: UserCache
+): Promise<boolean> {
+  const stmt = env.DATABASE.prepare(
+    "UPDATE user_cache SET user_state = ?1, customer_category = ?2 customer_name = ?3 customer_property = ?4 WHERE telegram_id = ?5"
+  );
+  const oldCache = await getUserCache(env, chatId);
+  const {
+    user_state,
+    customer_category,
+    customer_name,
+    customer_property,
+  }: UserCache = { ...oldCache, ...updateCache };
 
-  const newCache = { ...oldCache, ...updateCache };
-  CacheService.getUserCache().put(String(chatId), JSON.stringify(newCache));
+  const { success } = await stmt
+    .bind(
+      user_state,
+      customer_category,
+      customer_name,
+      customer_property,
+      chatId
+    )
+    .all();
+  return success;
 }

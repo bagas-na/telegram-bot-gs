@@ -14,7 +14,7 @@ export type CustomerCategory = (typeof CATEGORIES)[number];
 export type CustomerProperty = (typeof PROPERTIES)[number];
 export type Funnel = "F0" | "F3" | "F4" | "F5";
 export type UserCache = {
-  userState:
+  user_state:
     | "select_category"
     | "select_customer"
     | "create_customer"

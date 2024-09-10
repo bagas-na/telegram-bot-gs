@@ -12,12 +12,12 @@
  */
 
 export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		if (request.method === 'POST') {
-			
-		}
+  async fetch(request, env, ctx): Promise<Response> {
+    if (request.method === 'POST') {
+      const body = request.body
+    }
 
 
-		return new Response('Hello World!');
-	},
+    return new Response('Hello World!');
+  },
 } satisfies ExportedHandler<Env>;

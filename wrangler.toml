@@ -4,6 +4,11 @@ main = "src/index.ts"
 compatibility_date = "2024-09-03"
 compatibility_flags = ["nodejs_compat"]
 
+[vars]
+TELEGRAM_API_URL = "https://api.telegram.org/bot"
+SHEET_REFERENSI = "REFERENSI"
+SHEET_DATA = "DATA"
+
 # Automatically place your workloads in an optimal location to minimize latency.
 # If you are running back-end logic in a Worker, running it closer to your back-end infrastructure
 # rather than the end user may result in better performance.
@@ -106,3 +111,4 @@ database_id = "00cbd420-6f56-45cc-ba3d-695b46c3eb42"
 # [[vectorize]]
 # binding = "MY_INDEX"
 # index_name = "my-index"
+
