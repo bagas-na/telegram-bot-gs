@@ -1,10 +1,10 @@
 import {
-  CustomerCategory,
-  CustomerData,
-  CustomerProperty,
-  Funnel,
-  PROPERTIES,
-  UserCache,
+	CustomerCategory,
+	CustomerData,
+	CustomerProperty,
+	Funnel,
+	PROPERTIES,
+	UserCache,
 } from "../types";
 
 export async function getCustomerListD1(
@@ -110,7 +110,7 @@ export async function updateCustomerDataD1(
 		const sql = `UPDATE project_data SET ${customerProperty} = ?4 WHERE telegram_id = ?1 AND kategori_pelanggan = ?2 AND nama_pelanggan = ?3`;
 		const stmt = env.DATABASE.prepare(sql);
 		const { success } = await stmt
-			.bind(chatId, customerCategory, customerName)
+			.bind(chatId, customerCategory, customerName, updateValue)
 			.all();
 
 		return success;
@@ -174,7 +174,7 @@ export async function getCurrentUserNameD1(
 	}
 }
 
-export async function getUserCache(
+export async function getUserCacheD1(
 	env: Env,
 	chatId: number
 ): Promise<UserCache | null> {
@@ -198,7 +198,7 @@ export async function getUserCache(
 	}
 }
 
-export async function updateUserCache(
+export async function updateUserCacheD1(
 	env: Env,
 	chatId: number,
 	updateCache: Partial<UserCache>
