@@ -11,87 +11,93 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-export default {
-  async fetch(request, env, ctx): Promise<Response> {
-    if (request.method === 'POST') {
-      const body = request.body
-    }
-
-
-    return new Response('Hello World!');
-  },
-} satisfies ExportedHandler<Env>;
-
-
-
-import { Update } from "@grammyjs/types";
-import { getUserCache, isRegisteredUser, sendText } from "./data/googleSheets";
+import { CallbackQuery, Message, Update } from "@grammyjs/types";
+import { getUserCache, isRegisteredUserD1 } from "./data/d1";
+import { sendMessage } from "./data/telegramApi";
 import {
-  handleCreateCustomer,
-  handleSelectCategory,
-  handleSelectCustomer,
-  handleSelectProperty,
-  handleUpdateCustomer,
-  handleUpdateProperty,
+	handleCreateCustomer,
+	handleSelectCategory,
+	handleSelectCustomer,
+	handleSelectProperty,
+	handleUpdateCustomer,
+	handleUpdateProperty,
 } from "./stateHandlers";
 import { goToSelectCategory } from "./stateTransitions";
-import { DoPostEvent } from "./types";
 
-// Fungsi untuk menyetel webhook
-function setWebhook() {
-  const response = UrlFetchApp.fetch(`${TELEGRAM_API_URL}${TOKEN}/setWebhook?url=${WEB_APP_URL}`);
-  Logger.log(response.getContentText());
+export default {
+	async fetch(request, env, ctx): Promise<Response> {
+		if (request.method !== "POST") {
+			return new Response("Method not supported", { status: 405 });
+		}
+
+		const contentType = request.headers.get("Content-Type") || "";
+		if (!contentType.includes("application/json")) {
+			return new Response("Content-Type not supported", { status: 415 });
+		}
+
+		try {
+			const update: Update = await request.json();
+
+			if (update.message) {
+				handleNewMessage(env, update.message);
+				return new Response("JSON received successfully", { status: 200 });
+			}
+
+			if (update.callback_query) {
+				handleCallbackQuery(env, update.callback_query);
+				return new Response("JSON received successfully", { status: 200 });
+			}
+
+			return new Response("Internal Server Error", { status: 500 });
+		} catch (error) {
+			console.error("Request body is not valid JSON", error);
+			return new Response("Invalid JSON", { status: 400 });
+		}
+	},
+} satisfies ExportedHandler<Env>;
+
+async function handleNewMessage(env: Env, message: Message) {
+	const chatId = message.chat.id;
+	const firstName = message.chat.first_name;
+	const lastName = message.chat.last_name;
+	const fullName = [firstName, lastName].join(" ").trim();
+
+	const cache = await getUserCache(env, chatId);
+
+	// Mengecek apakah user terdaftar
+	if (!isRegisteredUserD1(env, chatId)) {
+		sendMessage(
+			env,
+			chatId,
+			`Maaf ${fullName}, Anda belum terdaftar. Hubungi admin untuk pendaftaran.`
+		);
+		return;
+	}
+
+	switch (cache?.user_state) {
+		case "awaiting_category_selection":
+			handleSelectCategory(env, message);
+			break;
+		case "awaiting_customer_selection":
+			handleSelectCustomer(env, message);
+			break;
+		case "awaiting_customer_creation":
+			handleCreateCustomer(env, message);
+			break;
+		case "awaiting_customer_update":
+			handleUpdateCustomer(env, message);
+			break;
+		case "awaiting_property_selection":
+			handleSelectProperty(env, message);
+			break;
+		case "awaiting_property_update":
+			handleUpdateProperty(env, message);
+			break;
+		default:
+			sendMessage(env, chatId, `Hai ${fullName}, Anda sudah terdaftar`);
+			goToSelectCategory(env, chatId);
+	}
+
+	return;
 }
-
-// Fungsi untuk menangani pesan yang masuk dari webhook
-// Entry point dari program ini
-function doPost(e: DoPostEvent): void {
-  Logger.log(e.postData.getDataAsString());
-  const update: Update = JSON.parse(e.postData.getDataAsString());
-  const incomingMessage = update.message;
-
-  if (incomingMessage === undefined) {
-    Logger.log("Message is empty, exit from doPost()");
-    return;
-  }
-
-  const chatId = incomingMessage.chat.id;
-  const firstName = incomingMessage.chat.first_name;
-  const lastName = incomingMessage.chat.last_name;
-  const fullName = [firstName, lastName].join(" ").trim();
-
-  const cache = getUserCache(chatId);
-
-  // Mengecek apakah user terdaftar di Google Sheets
-  if (!isRegisteredUser(chatId)) {
-    sendText(chatId, "Maaf " + fullName + ", Anda belum terdaftar. Hubungi admin untuk pendaftaran.");
-    CacheService.getUserCache().remove(String(chatId));
-    return;
-  }
-
-  switch (cache.userState) {
-    case "select_category":
-      handleSelectCategory(incomingMessage);
-      break;
-    case "select_customer":
-      handleSelectCustomer(incomingMessage, cache);
-      break;
-    case "create_customer":
-      handleCreateCustomer(incomingMessage, cache);
-      break;
-    case "update_customer":
-      handleUpdateCustomer(incomingMessage, cache);
-      break;
-    case "select_property":
-      handleSelectProperty(incomingMessage, cache);
-      break;
-    case "update_property":
-      handleUpdateProperty(incomingMessage, cache);
-      break;
-    default:
-      sendText(chatId, `Hai ${fullName}, Anda sudah terdaftar`);
-      goToSelectCategory(chatId);
-  }
-
-  return;
-}
+function handleCallbackQuery(env: Env, callback: CallbackQuery) {}

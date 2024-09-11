@@ -15,12 +15,12 @@ export type CustomerProperty = (typeof PROPERTIES)[number];
 export type Funnel = "F0" | "F3" | "F4" | "F5";
 export type UserCache = {
   user_state:
-    | "select_category"
-    | "select_customer"
-    | "create_customer"
-    | "update_customer"
-    | "select_property"
-    | "update_property";
+    | "awaiting_category_selection"
+    | "awaiting_customer_selection"
+    | "awaiting_customer_creation"
+    | "awaiting_customer_update"
+    | "awaiting_property_selection"
+    | "awaiting_property_update";
   customer_category?: CustomerCategory; // untuk state select_customer dan seterusnya
   customer_name?: string | null; // untuk menyimpan nama pelanggan di select_property dan update_property
   customer_property?: CustomerProperty | null;
