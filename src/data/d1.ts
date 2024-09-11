@@ -1,6 +1,8 @@
 import {
   CustomerCategory,
   CustomerData,
+  CustomerProperty,
+  Funnel,
   PROPERTIES,
   UserCache,
 } from "../types";
@@ -69,11 +71,108 @@ export async function getCustomerDataD1(
 	}
 }
 
-export async function insertNewCustomerD1() {}
-export async function updateCustomerDataD1() {}
+export async function insertNewCustomerD1(
+	env: Env,
+	chatId: number,
+	customerCategory: CustomerCategory,
+	customerName: string
+): Promise<boolean> {
+	try {
+		const stmt = env.DATABASE.prepare(
+			"INSERT INTO project_data (telegram_id, nama_am, kategori_pelanggan, nama_pelanggan) VALUES (?1, ?2, ?3, ?4)"
+		);
 
-export async function isRegisteredUserGSD1() {}
-export async function getCurrentUserName() {}
+		const userName = await getCurrentUserNameD1(env, chatId);
+		const { success } = await stmt
+			.bind(chatId, userName, customerCategory, customerName)
+			.all();
+
+		return success;
+	} catch (error) {
+		console.error(
+			`Error inserting new customer data for chatID: ${chatId}, category: ${customerCategory}, customerName: ${customerName}`,
+			error
+		);
+		throw new Error("Failed to insert new customer data.");
+	}
+}
+
+export async function updateCustomerDataD1(
+	env: Env,
+	chatId: number,
+	customerCategory: CustomerCategory,
+	customerName: string,
+	customerProperty: CustomerProperty,
+	updateValue: "SUDAH" | "BELUM" | Funnel | number
+): Promise<boolean> {
+	try {
+		// Final SQL query
+		const sql = `UPDATE project_data SET ${customerProperty} = ?4 WHERE telegram_id = ?1 AND kategori_pelanggan = ?2 AND nama_pelanggan = ?3`;
+		const stmt = env.DATABASE.prepare(sql);
+		const { success } = await stmt
+			.bind(chatId, customerCategory, customerName)
+			.all();
+
+		return success;
+	} catch (error) {
+		// Log the error
+		console.error(`Error updating user cache for chatId: ${chatId}`, error);
+		// Optionally rethrow the error or handle it as needed
+		throw new Error("Failed to update user cache.");
+	}
+}
+
+export async function isRegisteredUserD1(
+	env: Env,
+	chatId: number
+): Promise<boolean> {
+	try {
+		const stmt = env.DATABASE.prepare(
+			"SELECT name FROM users WHERE telegram_id = ?1"
+		);
+
+		const userName = await stmt.bind(chatId).first<string>();
+
+		if (userName) {
+			return true;
+		} else {
+			console.warn(`No user data found for chatId: ${chatId}`);
+			return false;
+		}
+	} catch (error) {
+		console.error(
+			`Error fetching current user data for chatID: ${chatId}`,
+			error
+		);
+		throw new Error("Failed to insert new customer data.");
+	}
+}
+
+export async function getCurrentUserNameD1(
+	env: Env,
+	chatId: number
+): Promise<string | null> {
+	try {
+		const stmt = env.DATABASE.prepare(
+			"SELECT name FROM users WHERE telegram_id = ?1"
+		);
+
+		const userName = await stmt.bind(chatId).first<string>();
+
+		if (userName) {
+			return userName;
+		} else {
+			console.warn(`No user data found for chatId: ${chatId}`);
+			return null;
+		}
+	} catch (error) {
+		console.error(
+			`Error fetching current user name for chatID: ${chatId}`,
+			error
+		);
+		throw new Error("Failed to insert new customer data.");
+	}
+}
 
 export async function getUserCache(
 	env: Env,
