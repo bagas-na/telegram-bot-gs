@@ -1,4 +1,4 @@
-import { CustomerCategory, CustomerData } from "./types";
+import { CustomerCategory, CustomerData } from "../types";
 
 export function formatCustomerData(customerData: CustomerData): string {
   let formatText;
