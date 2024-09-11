@@ -12,17 +12,15 @@
  */
 
 import { CallbackQuery, Message, Update } from "@grammyjs/types";
-import { getUserCache, isRegisteredUserD1 } from "./data/d1";
+import { getUserCacheD1, isRegisteredUserD1 } from "./data/d1";
 import { sendMessage } from "./data/telegramApi";
-import {
-	handleCreateCustomer,
-	handleSelectCategory,
-	handleSelectCustomer,
-	handleSelectProperty,
-	handleUpdateCustomer,
-	handleUpdateProperty,
-} from "./stateHandlers";
-import { goToSelectCategory } from "./stateTransitions";
+import handleCreateCustomer from "./stateHandlers/createCustomer";
+import handleSelectCategory from "./stateHandlers/selectCategory";
+import handleSelectCustomer from "./stateHandlers/selectCustomer";
+import handleSelectProperty from "./stateHandlers/selectProperty";
+import handleUpdateCustomer from "./stateHandlers/updateCustomer";
+import handleUpdateProperty from "./stateHandlers/updateProperty";
+import { goToSelectCategory } from "./stateTransitions/stateTransitions";
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
@@ -61,8 +59,7 @@ async function handleNewMessage(env: Env, message: Message) {
 	const firstName = message.chat.first_name;
 	const lastName = message.chat.last_name;
 	const fullName = [firstName, lastName].join(" ").trim();
-
-	const cache = await getUserCache(env, chatId);
+	const cache = await getUserCacheD1(env, chatId);
 
 	// Mengecek apakah user terdaftar
 	if (!isRegisteredUserD1(env, chatId)) {
@@ -74,24 +71,29 @@ async function handleNewMessage(env: Env, message: Message) {
 		return;
 	}
 
+	if (message.text === "/start") {
+		sendMessage(env, chatId, `Hai ${fullName}, Anda sudah terdaftar`);
+		goToSelectCategory(env, chatId);
+	}
+
 	switch (cache?.user_state) {
 		case "awaiting_category_selection":
 			handleSelectCategory(env, message);
 			break;
 		case "awaiting_customer_selection":
-			handleSelectCustomer(env, message);
+			handleSelectCustomer(env, message, cache);
 			break;
 		case "awaiting_customer_creation":
-			handleCreateCustomer(env, message);
+			handleCreateCustomer(env, message, cache);
 			break;
 		case "awaiting_customer_update":
-			handleUpdateCustomer(env, message);
+			handleUpdateCustomer(env, message, cache);
 			break;
 		case "awaiting_property_selection":
-			handleSelectProperty(env, message);
+			handleSelectProperty(env, message, cache);
 			break;
 		case "awaiting_property_update":
-			handleUpdateProperty(env, message);
+			handleUpdateProperty(env, message, cache);
 			break;
 		default:
 			sendMessage(env, chatId, `Hai ${fullName}, Anda sudah terdaftar`);
@@ -100,4 +102,5 @@ async function handleNewMessage(env: Env, message: Message) {
 
 	return;
 }
+
 function handleCallbackQuery(env: Env, callback: CallbackQuery) {}
