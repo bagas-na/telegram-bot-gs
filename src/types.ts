@@ -27,7 +27,7 @@ export type UserCache = {
 };
 export type CustomerData = {
   customer_category: string;
-  name: string;
+  customer_name: string;
   submit_proposal: boolean;
   connectivity: Funnel;
   eazy: Funnel;
