@@ -11,15 +11,15 @@ export async function getCustomerListD1(
 	env: Env,
 	chatId: number,
 	customerCategory: CustomerCategory
-): Promise<string[]> {
+): Promise<CustomerData[]> {
 	try {
 		const stmt = env.DATABASE.prepare(
-			"SELECT nama_pelanggan FROM project_data WHERE telegram_id = ?1 AND kategori_pelanggan = ?2"
+			`SELECT customer_name, ${PROPERTIES.join(", ")} FROM project_data WHERE telegram_id = ?1 AND customer_category = ?2`
 		);
 
 		// Execute the query
 		const customerList = (
-			await stmt.bind(chatId, customerCategory).all<string>()
+			await stmt.bind(chatId, customerCategory).all<CustomerData>()
 		).results;
 
 		if (!customerList) {
@@ -27,7 +27,7 @@ export async function getCustomerListD1(
 				`No customer name found for chatId: ${chatId}, category: ${customerCategory}`
 			);
 		}
-		return customerList; // Return null if no cache found
+		return customerList; // Return empty array if no customer found
 	} catch (error: unknown) {
 		console.error(
 			`Error fetching customer list for chatID: ${chatId}, category: ${customerCategory}`,
@@ -45,9 +45,9 @@ export async function getCustomerDataD1(
 ): Promise<CustomerData | null> {
 	try {
 		const stmt = env.DATABASE.prepare(
-			`SELECT nama_pelanggan, ${PROPERTIES.join(
+			`SELECT customer_name, ${PROPERTIES.join(
 				", "
-			)} FROM project_data WHERE telegram_id = ?1 AND kategori_pelanggan = ?2 AND nama_pelanggan = ?3`
+			)} FROM project_data WHERE telegram_id = ?1 AND customer_category = ?2 AND customer_name = ?3`
 		);
 
 		const customerData = await stmt
@@ -79,7 +79,7 @@ export async function insertNewCustomerD1(
 ): Promise<boolean> {
 	try {
 		const stmt = env.DATABASE.prepare(
-			"INSERT INTO project_data (telegram_id, nama_am, kategori_pelanggan, nama_pelanggan) VALUES (?1, ?2, ?3, ?4)"
+			"INSERT INTO project_data (telegram_id, nama_am, customer_category, customer_name) VALUES (?1, ?2, ?3, ?4)"
 		);
 
 		const userName = await getCurrentUserNameD1(env, chatId);
@@ -107,7 +107,7 @@ export async function updateCustomerDataD1(
 ): Promise<boolean> {
 	try {
 		// Final SQL query
-		const sql = `UPDATE project_data SET ${customerProperty} = ?4 WHERE telegram_id = ?1 AND kategori_pelanggan = ?2 AND nama_pelanggan = ?3`;
+		const sql = `UPDATE project_data SET ${customerProperty} = ?4 WHERE telegram_id = ?1 AND customer_category = ?2 AND customer_name = ?3`;
 		const stmt = env.DATABASE.prepare(sql);
 		const { success } = await stmt
 			.bind(chatId, customerCategory, customerName, updateValue)
@@ -118,7 +118,7 @@ export async function updateCustomerDataD1(
 		// Log the error
 		console.error(`Error updating user cache for chatId: ${chatId}`, error);
 		// Optionally rethrow the error or handle it as needed
-		throw new Error("Failed to update user cache.");
+		throw new Error("Failed to update customer data.");
 	}
 }
 
@@ -144,7 +144,7 @@ export async function isRegisteredUserD1(
 			`Error fetching current user data for chatID: ${chatId}`,
 			error
 		);
-		throw new Error("Failed to insert new customer data.");
+		throw new Error("Failed to get current user data.");
 	}
 }
 
@@ -170,7 +170,7 @@ export async function getCurrentUserNameD1(
 			`Error fetching current user name for chatID: ${chatId}`,
 			error
 		);
-		throw new Error("Failed to insert new customer data.");
+		throw new Error("Failed to get current user data.");
 	}
 }
 
