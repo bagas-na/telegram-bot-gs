@@ -33,8 +33,8 @@ export default async function handleSelectProperty(
 
 	// Jika input user tidak sesuai dengan pilihan, perintahkan untuk input kategori kembali
 	if (chosenProperty === null || ![...PROPERTIES, "CANCEL"].includes(chosenProperty)) {
-		sendMessage(env, chatId, "Pilihan tidak ditemukan");
-		goToSelectProperty(env, chatId, category);
+		await sendMessage(env, chatId, "Pilihan tidak ditemukan");
+		await goToSelectProperty(env, chatId, category);
 		return;
 	}
 
@@ -46,11 +46,11 @@ export default async function handleSelectProperty(
 		}
 
 		if (chosenProperty === "CANCEL") {
-			goToSelectProperty(env, chatId, category, customerData);
+			await goToSelectProperty(env, chatId, category, customerData);
 			return;
 		}
 
-		goToUpdateProperty(env, chatId, chosenProperty, customerData);
+		await goToUpdateProperty(env, chatId, chosenProperty, customerData);
 		return;
 	} catch (error) {}
 }

@@ -17,7 +17,7 @@ export default async function handleSelectCategory(
 
 	// Jika input user tidak sesuai dengan pilihan, perintahkan untuk input kategori kembali
 	if (chosenCategory === undefined || !CATEGORIES.includes(chosenCategory)) {
-		goToSelectCategory(
+		await goToSelectCategory(
 			env,
 			chatId,
 			"Pilihan kategori tidak ditemukan. Silakan pilih kategori pelanggan dari pilihan di bawah ini."
@@ -36,7 +36,7 @@ export default async function handleSelectCategory(
 	try {
 		const customerList = await getCustomerListD1(env, chatId, chosenCategory);
 
-		goToSelectCustomer(env, chatId, customerList, chosenCategory);
+		await goToSelectCustomer(env, chatId, customerList, chosenCategory);
 		return;
 	} catch (error) {
 		console.error('An error occurred:', error);

@@ -65,7 +65,7 @@ export default async function handleUpdateProperty(
 		}
 
 		if (updateValue === "CANCEL") {
-			goToSelectProperty(env, chatId, category, customerData);
+			await goToSelectProperty(env, chatId, category, customerData);
 			return;
 		}
 
@@ -79,8 +79,8 @@ export default async function handleUpdateProperty(
 		);
 
 		if (success) {
-			sendMessage(env, chatId, `Data ${customerProperty} telah diubah.`);
-			goToSelectProperty(env, chatId, category, customerData);
+			await sendMessage(env, chatId, `Data ${customerProperty} telah diubah.`);
+			await goToSelectProperty(env, chatId, category, customerData);
 			return;
 		} else {
 			// Handle the case when updateCustomrDataD1 fails

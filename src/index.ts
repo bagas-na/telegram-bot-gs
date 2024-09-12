@@ -24,6 +24,8 @@ import { goToSelectCategory } from "./stateTransitions/stateTransitions";
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
+		console.log("Request received:");
+
 		if (request.method !== "POST") {
 			return new Response("Method not supported", { status: 405 });
 		}
@@ -37,7 +39,9 @@ export default {
 			const update: Update = await request.json();
 
 			if (update.message) {
-				handleNewMessage(env, update.message);
+				console.log("Handle JSON as new message");
+				console.log({ message: update.message });
+				await handleNewMessage(env, update.message);
 				return new Response("JSON received successfully", { status: 200 });
 			}
 
@@ -61,9 +65,11 @@ async function handleNewMessage(env: Env, message: Message) {
 	const fullName = [firstName, lastName].join(" ").trim();
 	const cache = await getUserCacheD1(env, chatId);
 
+	console.log({ chatId, fullName, cache }, message.text);
+
 	// Mengecek apakah user terdaftar
 	if (!isRegisteredUserD1(env, chatId)) {
-		sendMessage(
+		await sendMessage(
 			env,
 			chatId,
 			`Maaf ${fullName}, Anda belum terdaftar. Hubungi admin untuk pendaftaran.`
@@ -72,32 +78,32 @@ async function handleNewMessage(env: Env, message: Message) {
 	}
 
 	if (message.text === "/start") {
-		sendMessage(env, chatId, `Hai ${fullName}, Anda sudah terdaftar`);
-		goToSelectCategory(env, chatId);
+		await sendMessage(env, chatId, `Hai ${fullName}, Anda sudah terdaftar`);
+		await goToSelectCategory(env, chatId);
 	}
 
 	switch (cache?.user_state) {
 		case "awaiting_category_selection":
-			handleSelectCategory(env, message);
+			await handleSelectCategory(env, message);
 			break;
 		case "awaiting_customer_selection":
-			handleSelectCustomer(env, message, cache);
+			await handleSelectCustomer(env, message, cache);
 			break;
 		case "awaiting_customer_creation":
-			handleCreateCustomer(env, message, cache);
+			await handleCreateCustomer(env, message, cache);
 			break;
 		case "awaiting_customer_update":
-			handleUpdateCustomer(env, message, cache);
+			await handleUpdateCustomer(env, message, cache);
 			break;
 		case "awaiting_property_selection":
-			handleSelectProperty(env, message, cache);
+			await handleSelectProperty(env, message, cache);
 			break;
 		case "awaiting_property_update":
-			handleUpdateProperty(env, message, cache);
+			await handleUpdateProperty(env, message, cache);
 			break;
 		default:
-			sendMessage(env, chatId, `Hai ${fullName}, Anda sudah terdaftar`);
-			goToSelectCategory(env, chatId);
+			await sendMessage(env, chatId, `Hai ${fullName}, Anda sudah terdaftar`);
+			await goToSelectCategory(env, chatId);
 	}
 
 	return;

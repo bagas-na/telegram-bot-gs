@@ -10,11 +10,13 @@ export async function sendMessage(
 	const apiMethod = "/sendMessage";
 	const Url = env.TELEGRAM_API_URL + env.BOT_TOKEN + apiMethod;
 
+	
 	const messageBody = {
 		chat_id: chatId,
 		text,
 		replyMarkup,
 	};
+	console.log(`Sending message to ${Url}, ${JSON.stringify(messageBody)}`)
 
 	const options: RequestInit = {
 		method: "POST",

@@ -16,15 +16,15 @@ import {
 } from "../utils/formats";
 
 // Fungsi yang dijalankan sebelum mengubah userState menjadi "select_category"
-export function goToSelectCategory(
+export async function goToSelectCategory(
 	env: Env,
 	chatId: number,
 	customText?: string
-): void {
+): Promise<void> {
 	let defaultText = "**Silahkan pilih kategori pelanggan**\n";
 	defaultText += "Langsung klik saja pada tombol yang muncul di bawah!";
 
-	sendMessage(env, chatId, customText || defaultText, {
+	await sendMessage(env, chatId, customText || defaultText, {
 		keyboard: CATEGORY_LIST,
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -33,12 +33,12 @@ export function goToSelectCategory(
 }
 
 // Fungsi yang dijalankan sebelum mengubah userState menjadi "select_customer"
-export function goToSelectCustomer(
+export async function goToSelectCustomer(
 	env: Env,
 	chatId: number,
 	customerList: CustomerData[],
 	chosenCategory: CustomerCategory
-): void {
+): Promise<void> {
 	const customerNames = customerList.map((c) => c.customer_name);
 	let clientText: string;
 
@@ -49,7 +49,7 @@ export function goToSelectCustomer(
 		 *   YA untuk menambahkan pelanggan
 		 *   TIDAK untuk memilih kategori pelanggan kembali
 		 */
-		sendMessage(env, chatId, "Kategori " + chosenCategory + " masih kosong.");
+		await sendMessage(env, chatId, "Kategori " + chosenCategory + " masih kosong.");
 
 		clientText = "➡️ Ketik `NEW [nama_gc]` untuk menambahkan pelanggan baru.\n";
 		clientText += "contoh: **NEW SMA 8 Bandung**.\n\n";
@@ -64,7 +64,7 @@ export function goToSelectCustomer(
 		for (let i = 0; i < customerNames.length; i++) {
 			clientText = String(i + 1) + ". " + customerNames[i] + "\n";
 		}
-		sendMessage(env, chatId, clientText);
+		await sendMessage(env, chatId, clientText);
 
 		clientText = "➡️ Ketik `NEW [nama_gc]` untuk menambahkan pelanggan baru.\n";
 		clientText += "contoh: **NEW SMA 8 Bandung**.\n\n";
@@ -76,7 +76,7 @@ export function goToSelectCustomer(
 	}
 
 	// Berikan pilihan CANCEL jika user ingin kembali ke pilihan daftar kategori pelanggan
-	sendMessage(env, chatId, clientText, {
+	await sendMessage(env, chatId, clientText, {
 		keyboard: [["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -90,12 +90,12 @@ export function goToSelectCustomer(
 	return;
 }
 
-export function goToCreateCustomer(
+export async function goToCreateCustomer(
 	env: Env,
 	chatId: number,
 	category: CustomerCategory,
 	customerName: string
-): void {
+): Promise<void> {
 	let clientText: string;
 
 	clientText = "**KONFIRMASI DATA**\n\n";
@@ -107,7 +107,7 @@ export function goToCreateCustomer(
 	clientText +=
 		"Jika sudah benar dan lurus, silahkan klik tombol **OK**. Jika belum, silahkan klik tombol **Cancel**";
 
-	sendMessage(env, chatId, clientText, {
+	await sendMessage(env, chatId, clientText, {
 		keyboard: [["OK"], ["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -119,13 +119,13 @@ export function goToCreateCustomer(
 	});
 }
 
-export function goToUpdateCustomer(
+export async function goToUpdateCustomer(
 	env: Env,
 	chatId: number,
 	category: CustomerCategory,
 	customerData: CustomerData,
 	customText?: string
-): void {
+): Promise<void> {
 	let defaultText: string;
 	defaultText = "**KONFIRMASI DATA**\n\n";
 	defaultText += "Apakah pelanggan yang terpilih ini sudah benar?\n";
@@ -133,7 +133,7 @@ export function goToUpdateCustomer(
 	defaultText +=
 		"\nJika anda ingin meng-UPDATE GC ini, silahkan klik tombol **OK**. Jika tidak, silahkan klik tombol **Cancel**";
 
-	sendMessage(env, chatId, customText || defaultText, {
+	await sendMessage(env, chatId, customText || defaultText, {
 		keyboard: [["OK"], ["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -145,24 +145,24 @@ export function goToUpdateCustomer(
 	});
 }
 
-export function goToSelectProperty(
+export async function goToSelectProperty(
 	env: Env,
 	chatId: number,
 	category: CustomerCategory,
 	customerData?: CustomerData,
 	customText?: string
-): void {
+): Promise<void> {
 	// Menampilkan data detail pelanggan saat ini
 	if (customerData) {
 		let detailedText = "Berikut adalah data pelanggan saat ini.\n\n";
 		detailedText += formatCustomerData(customerData);
-		sendMessage(env, chatId, detailedText);
+		await sendMessage(env, chatId, detailedText);
 	}
 
 	// Menampilkan pilihan property dari customer yang bisa diubah
 	let clientText = formatPropertySelectionMenu(category);
 
-	sendMessage(env, chatId, clientText, {
+	await sendMessage(env, chatId, clientText, {
 		keyboard: [...PROPERTIES_LIST, ["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -171,19 +171,19 @@ export function goToSelectProperty(
 	updateUserCacheD1(env, chatId, { user_state: "awaiting_property_selection" });
 }
 
-export function goToUpdateProperty(
+export async function goToUpdateProperty(
 	env: Env,
 	chatId: number,
 	chosenProperty: CustomerProperty,
 	customerData: CustomerData
-): void {
+): Promise<void> {
 	let clientText;
 	let keyboardOptions: Array<Array<Funnel | "CANCEL" | "SUDAH" | "BELUM">>;
 	clientText = `Status ${MAP_PROPS_TO_TEXT[chosenProperty]} untuk pelanggan ini adalah sebagai berikut:\n\n`;
 	clientText += `Kategori: ${customerData.customer_category}\n`;
 	clientText += `Nama GC: ${customerData.customer_name}\n`;
 	clientText += `${MAP_PROPS_TO_TEXT[chosenProperty]}: `;
-	sendMessage(env, chatId, clientText);
+	await sendMessage(env, chatId, clientText);
 
 	if (chosenProperty === "nilai_project") {
 		clientText =
@@ -210,7 +210,7 @@ export function goToUpdateProperty(
 		keyboardOptions = [["CANCEL"]];
 	}
 
-	sendMessage(env, chatId, clientText, {
+	await sendMessage(env, chatId, clientText, {
 		keyboard: keyboardOptions,
 		one_time_keyboard: true,
 		resize_keyboard: true,

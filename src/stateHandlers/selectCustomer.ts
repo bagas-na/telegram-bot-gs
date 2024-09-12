@@ -62,7 +62,7 @@ export default async function handleSelectCustomer(
 				);
 				break;
 			case "CANCEL":
-				goToSelectCategory(env, chatId);
+				await goToSelectCategory(env, chatId);
 				break;
 			default:
 				console.warn(
@@ -75,13 +75,13 @@ export default async function handleSelectCustomer(
 	}
 }
 
-function caseSelectNewCustomer(
+async function caseSelectNewCustomer(
 	env: Env,
 	chatId: number,
 	category: CustomerCategory,
 	existingCustomerList: CustomerData[],
 	customerName: string
-): void {
+): Promise<void> {
 	const existingCustomerNames = existingCustomerList.map((c) =>
 		c.customer_name.toLowerCase()
 	);
@@ -89,7 +89,7 @@ function caseSelectNewCustomer(
 
 	// Cek apabila nama pelanggan sudah ada dalam list
 	if (!existingCustomerNames.includes(customerName.toLowerCase())) {
-		goToCreateCustomer(env, chatId, category, customerName);
+		await goToCreateCustomer(env, chatId, category, customerName);
 	}
 
 	// Jika pelanggan sudah ada, ambil data pelanggan tersebut.
@@ -103,7 +103,7 @@ function caseSelectNewCustomer(
 	clientText +=
 		"\nJika anda ingin meng-UPDATE GC ini, silahkan klik tombol **OK**. Jika tidak, silahkan klik tombol **Cancel**";
 
-	sendMessage(env, chatId, clientText, {
+	await sendMessage(env, chatId, clientText, {
 		keyboard: [["OK"], ["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -115,13 +115,13 @@ function caseSelectNewCustomer(
 	});
 }
 
-function caseSelectUpdateCustomer(
+async function caseSelectUpdateCustomer(
 	env: Env,
 	chatId: number,
 	category: CustomerCategory,
 	existingCustomerList: CustomerData[],
 	customerName: string
-): void {
+): Promise<void> {
 	const existingCustomerNames = existingCustomerList.map((c) =>
 		c.customer_name.toLowerCase()
 	);
@@ -140,7 +140,7 @@ function caseSelectUpdateCustomer(
 		const customerData = existingCustomerList[
 			customerIndex - 1
 		] as CustomerData;
-		goToUpdateCustomer(env, chatId, category, customerData);
+		await goToUpdateCustomer(env, chatId, category, customerData);
 	}
 
 	// Jika no. urut di luar batas, berikan informasi mengenai batasan
@@ -149,7 +149,7 @@ function caseSelectUpdateCustomer(
 			existingCustomerList.length + 1
 		)}).`;
 
-		sendMessage(env, chatId, clientText, {
+		await sendMessage(env, chatId, clientText, {
 			keyboard: [["CANCEL"]],
 			one_time_keyboard: true,
 			resize_keyboard: true,
@@ -164,6 +164,6 @@ function caseSelectUpdateCustomer(
 		const customerData = existingCustomerList.filter(
 			(c) => c.customer_name.toLowerCase() === customerName.toLowerCase()
 		)[0] as CustomerData;
-		goToUpdateCustomer(env, chatId, category, customerData);
+		await goToUpdateCustomer(env, chatId, category, customerData);
 	}
 }
