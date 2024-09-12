@@ -31,6 +31,11 @@ export default async function handleSelectCustomer(
 		return;
 	}
 
+	if (commandText === "CANCEL") {
+		await goToSelectCategory(env, chatId);
+		return;
+	}
+
 	// Memecah commandText menjadi command (NEW, UPDATE, CANCEL), dan customerName
 	const [command, ...args] = commandText.trim().split(" ");
 	const customerName = args.join(" ").trim();
@@ -44,7 +49,7 @@ export default async function handleSelectCustomer(
 
 		switch (command.toUpperCase()) {
 			case "NEW":
-				caseSelectNewCustomer(
+				await caseSelectNewCustomer(
 					env,
 					chatId,
 					category,
@@ -53,7 +58,7 @@ export default async function handleSelectCustomer(
 				);
 				break;
 			case "UPDATE":
-				caseSelectUpdateCustomer(
+				await caseSelectUpdateCustomer(
 					env,
 					chatId,
 					category,
@@ -109,7 +114,7 @@ async function caseSelectNewCustomer(
 		resize_keyboard: true,
 	});
 
-	updateUserCacheD1(env, chatId, {
+	await updateUserCacheD1(env, chatId, {
 		user_state: "awaiting_customer_update",
 		customer_name: customerData.customer_name,
 	});
@@ -154,7 +159,7 @@ async function caseSelectUpdateCustomer(
 			one_time_keyboard: true,
 			resize_keyboard: true,
 		});
-		updateUserCacheD1(env, chatId, {
+		await updateUserCacheD1(env, chatId, {
 			user_state: "awaiting_customer_selection",
 		});
 	}

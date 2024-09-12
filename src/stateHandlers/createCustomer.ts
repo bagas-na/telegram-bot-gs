@@ -14,7 +14,7 @@ export default async function handleCreateCustomer(
 ): Promise<void> {
 	const chatId = message.chat.id;
 	const choice = message.text
-		? (message.text.toUpperCase() as "YA" | "TIDAK")
+		? (message.text.toUpperCase() as "OK" | "CANCEL")
 		: null;
 	const category = userCache.customer_category;
 	const customerName = userCache.customer_name;
@@ -34,7 +34,7 @@ export default async function handleCreateCustomer(
 	let clientText: string = "";
 
 	switch (choice) {
-		case "YA":
+		case "OK":
 			try {
 				// Membuat pelanggan baru
 				const success = await insertNewCustomerD1(
@@ -66,7 +66,7 @@ export default async function handleCreateCustomer(
 					}
 
 					// Kembali ke daftar pilihan property yang akan diubah
-					goToSelectProperty(env, chatId, category, customerData);
+					await goToSelectProperty(env, chatId, category, customerData);
 				} else {
 					// Handle the case when insertNewCustomerD1 fails to insert
 					throw new Error("Failed to insert new customer");
@@ -76,11 +76,11 @@ export default async function handleCreateCustomer(
 			}
 			break;
 
-		case "TIDAK":
+		case "CANCEL":
 			// Kembali ke daftar pelanggan
 			try {
 				const customerList = await getCustomerListD1(env, chatId, category);
-				goToSelectCustomer(env, chatId, customerList, category);
+				await goToSelectCustomer(env, chatId, customerList, category);
 			} catch (error) {
         console.error("An error occurred:", error);
       }

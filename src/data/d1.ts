@@ -203,6 +203,7 @@ export async function updateUserCacheD1(
 	chatId: number,
 	updateCache: Partial<UserCache>
 ): Promise<boolean> {
+	console.log("Updating user cache...");
 	try {
 		// Create an array to hold the dynamic SQL parts
 		const updates = []; // for constructing query
@@ -217,11 +218,11 @@ export async function updateUserCacheD1(
 			updates.push("customer_category = ?");
 			values.push(updateCache.customer_category);
 		}
-		if (updateCache.customer_name !== undefined) {
+		if (updateCache.customer_name !== undefined && updateCache.customer_name !== null) {
 			updates.push("customer_name = ?");
 			values.push(updateCache.customer_name);
 		}
-		if (updateCache.customer_property !== undefined) {
+		if (updateCache.customer_property !== undefined && updateCache.customer_property !== null) {
 			updates.push("customer_property = ?");
 			values.push(updateCache.customer_property);
 		}
@@ -243,6 +244,7 @@ export async function updateUserCacheD1(
 
 		// Execute the update statement
 		const { success } = await stmt.bind(...values).all();
+		console.log(`The query \n${sql}\n has ${success ? 'completed' : 'failed'}.`)
 
 		return success;
 	} catch (error) {

@@ -13,8 +13,8 @@ export default async function handleUpdateCustomer(
 ): Promise<void> {
 	const chatId = message.chat.id;
 	const choice = message.text
-		? (message.text.toUpperCase() as "YA" | "TIDAK")
-		: null; // YES / NO choice
+		? (message.text.toUpperCase() as "OK" | "CANCEL")
+		: null;
 	const category = userCache.customer_category;
 	const customerName = userCache.customer_name;
 
@@ -31,7 +31,7 @@ export default async function handleUpdateCustomer(
 	}
 
 	switch (choice) {
-		case "YA":
+		case "OK":
 			try {
 				const customerData = await getCustomerDataD1(
 					env,
@@ -45,17 +45,17 @@ export default async function handleUpdateCustomer(
 				}
 
 				// Lanjut ke pilihan property yang akan diubah
-				goToSelectProperty(env, chatId, category, customerData);
+				await goToSelectProperty(env, chatId, category, customerData);
 			} catch (error) {
 				console.error("An error occurred:", error);
 			}
 			break;
 
-		case "TIDAK":
+		case "CANCEL":
 			try {
 				// Kembali ke daftar pelanggan
 				const customerList = await getCustomerListD1(env, chatId, category);
-				goToSelectCustomer(env, chatId, customerList, category);
+				await goToSelectCustomer(env, chatId, customerList, category);
 			} catch (error) {
 				console.error("An error occurred:", error);
 			}

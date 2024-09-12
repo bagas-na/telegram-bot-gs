@@ -29,7 +29,7 @@ export async function goToSelectCategory(
 		one_time_keyboard: true,
 		resize_keyboard: true,
 	});
-	updateUserCacheD1(env, chatId, { user_state: "awaiting_category_selection" });
+	await updateUserCacheD1(env, chatId, { user_state: "awaiting_category_selection" });
 }
 
 // Fungsi yang dijalankan sebelum mengubah userState menjadi "select_customer"
@@ -82,7 +82,7 @@ export async function goToSelectCustomer(
 		resize_keyboard: true,
 	});
 
-	updateUserCacheD1(env, chatId, {
+	await updateUserCacheD1(env, chatId, {
 		user_state: "awaiting_customer_selection",
 		customer_category: chosenCategory,
 	});
@@ -113,7 +113,7 @@ export async function goToCreateCustomer(
 		resize_keyboard: true,
 	});
 
-	updateUserCacheD1(env, chatId, {
+	await updateUserCacheD1(env, chatId, {
 		user_state: "awaiting_customer_creation",
 		customer_name: customerName,
 	});
@@ -139,7 +139,7 @@ export async function goToUpdateCustomer(
 		resize_keyboard: true,
 	});
 
-	updateUserCacheD1(env, chatId, {
+	await updateUserCacheD1(env, chatId, {
 		user_state: "awaiting_customer_update",
 		customer_name: customerData.customer_name,
 	});
@@ -168,7 +168,7 @@ export async function goToSelectProperty(
 		resize_keyboard: true,
 	});
 
-	updateUserCacheD1(env, chatId, { user_state: "awaiting_property_selection" });
+	await updateUserCacheD1(env, chatId, { user_state: "awaiting_property_selection" });
 }
 
 export async function goToUpdateProperty(
@@ -216,7 +216,7 @@ export async function goToUpdateProperty(
 		resize_keyboard: true,
 	});
 
-	updateUserCacheD1(env, chatId, {
+	await updateUserCacheD1(env, chatId, {
 		user_state: "awaiting_property_update",
 		customer_property: chosenProperty,
 	});
