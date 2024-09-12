@@ -1,123 +1,92 @@
-export default function handleUpdateProperty(env: Env, message: Message): void {
-	const chatId = message.chat.id;
-	const category = cache.customer_category;
-	const customerName = cache.customer_name;
-	const customerProperty = cache.customer_property;
-	const propertyValue = message.text ? message.text.toUpperCase() : null; // true / false / F0 / F3 / F4 / F5 / number
-	let customerData: CustomerData;
+import { Message } from "@grammyjs/types";
+import { getCustomerDataD1, updateCustomerDataD1 } from "../data/d1";
+import { sendMessage } from "../data/telegramApi";
+import { goToSelectProperty } from "../stateTransitions/stateTransitions";
+import { Funnel, FUNNEL_PROPERTIES, UserCache } from "../types";
 
-	if (propertyValue === null) {
-		// do nothing
+export default async function handleUpdateProperty(
+	env: Env,
+	message: Message,
+	userCache: UserCache
+): Promise<void> {
+	const numberRegex = /^-?\d+(\.\d+)?$/;
+	const chatId = message.chat.id;
+	const category = userCache.customer_category;
+	const customerName = userCache.customer_name;
+	const customerProperty = userCache.customer_property;
+	const updateValue = message.text
+		? (message.text.toUpperCase() as "SUDAH" | "BELUM" | Funnel | "CANCEL")
+		: null; // true / false / F0 / F3 / F4 / F5 / number
+
+	if (!category || !customerName || !customerProperty || !updateValue) {
+		console.warn("Property not updated");
 		return;
 	}
 
-	if (propertyValue.toUpperCase() === "CANCEL") {
-		const customerData = getCustomerData(chatId, category, customerName);
-		goToSelectProperty(chatId, category, customerData);
+	if (
+		customerProperty === "submit_proposal" &&
+		!["SUDAH", "BELUM"].includes(updateValue as "SUDAH" | "BELUM")
+	) {
+		console.warn(
+			`Property '${customerProperty}' can only take the values "SUDAH" and "BELUM". Current value ${updateValue}`
+		);
+		return;
+	} else if (
+		FUNNEL_PROPERTIES.includes(customerProperty) &&
+		!["F0", "F3", "F4", "F5"].includes(updateValue as Funnel)
+	) {
+		console.warn(
+			`Property '${customerProperty}' can only take the values "F0", "F3", "F4", and "F5. Current value ${updateValue}`
+		);
+		return;
+	} else if (
+		customerProperty === "nilai_project" &&
+		!numberRegex.test(updateValue)
+	) {
+		console.warn(
+			`Property '${customerProperty}' can only take number values. Current value ${updateValue}`
+		);
+		return;
 	}
 
-	switch (customerProperty) {
-		case "submit_proposal":
-			if (!["SUDAH", "BELUM"].includes(propertyValue)) {
-				// do nothing, kalau input tidak sesuai
-				break;
-			}
+	try {
+		const customerData = await getCustomerDataD1(
+			env,
+			chatId,
+			category,
+			customerName
+		);
 
-			if (propertyValue === "SUDAH") {
-				updateCustomerProperty(
-					chatId,
-					category,
-					customerName,
-					customerProperty,
-					true
-				);
-			} else if (propertyValue === "BELUM") {
-				updateCustomerProperty(
-					chatId,
-					category,
-					customerName,
-					customerProperty,
-					false
-				);
-			}
-			sendText(chatId, "Data " + customerProperty + " telah diubah.");
-			customerData = getCustomerData(chatId, category, customerName);
-
-			goToSelectProperty(chatId, category, customerData);
-			break;
-
-		case "connectivity":
-		case "eazy":
-		case "oca":
-		case "digiclinic":
-		case "pijar":
-		case "sprinthink":
-			if (
-				!["F0 (lead)", "F3 (submit)", "F4 (negotiation)", "F5 (win)"].includes(
-					propertyValue
-				)
-			) {
-				// do nothing
-				break;
-			}
-
-			if (propertyValue === "F0 (lead)") {
-				updateCustomerProperty(
-					chatId,
-					category,
-					customerName,
-					customerProperty,
-					"F0"
-				);
-			} else if (propertyValue === "F3 (submit)") {
-				updateCustomerProperty(
-					chatId,
-					category,
-					customerName,
-					customerProperty,
-					"F3"
-				);
-			} else if (propertyValue === "F4 (negotiation)") {
-				updateCustomerProperty(
-					chatId,
-					category,
-					customerName,
-					customerProperty,
-					"F4"
-				);
-			} else if (propertyValue === "F5 (win)") {
-				updateCustomerProperty(
-					chatId,
-					category,
-					customerName,
-					customerProperty,
-					"F5"
-				);
-			}
-			sendText(chatId, "Data " + customerProperty + " telah diubah.");
-			customerData = getCustomerData(chatId, category, customerName);
-
-			goToSelectProperty(chatId, category, customerData);
-			break;
-
-		case "nilai_project":
-			const numberRegex = /^-?\d+(\.\d+)?$/;
-			if (!numberRegex.test(propertyValue)) {
-				// do nothing, kalau input bukan angka
-				break;
-			}
-			updateCustomerProperty(
-				chatId,
-				category,
-				customerName,
-				customerProperty,
-				Number(propertyValue)
+		if (!customerData) {
+			console.warn(
+				`Customer named ${customerName} does not exist. No properties has been updated`
 			);
+			return;
+		}
 
-			sendText(chatId, "Data " + customerProperty + " telah diubah.");
-			customerData = getCustomerData(chatId, category, customerName);
+		if (updateValue === "CANCEL") {
+			goToSelectProperty(env, chatId, category, customerData);
+			return;
+		}
 
-			goToSelectProperty(chatId, category, customerData);
-			break;
+		const success = await updateCustomerDataD1(
+			env,
+			chatId,
+			category,
+			customerName,
+			customerProperty,
+			updateValue
+		);
+
+		if (success) {
+			sendMessage(env, chatId, `Data ${customerProperty} telah diubah.`);
+			goToSelectProperty(env, chatId, category, customerData);
+			return;
+		} else {
+			// Handle the case when updateCustomrDataD1 fails
+			throw new Error("Failed to update customer data.");
+		}
+	} catch (error) {
+		console.error("An error occurred:", error);
 	}
 }
