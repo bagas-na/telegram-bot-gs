@@ -1,3 +1,4 @@
+import { Message } from "@grammyjs/types";
 import { ReplyMarkup } from "../types";
 
 // Fungsi untuk mengirim teks ke chat dengan markup keyboard
@@ -14,7 +15,7 @@ export async function sendMessage(
 	const messageBody = {
 		chat_id: chatId,
 		text,
-		replyMarkup,
+		reply_markup: replyMarkup,
 	};
 	console.log(`Sending message to ${Url}, ${JSON.stringify(messageBody)}`)
 
