@@ -1,15 +1,19 @@
-import { updateUserCache } from "./data/d1";
-import { sendMessage } from "./data/telegramApi";
+import { updateUserCacheD1 } from "../data/d1";
+import { sendMessage } from "../data/telegramApi";
 import {
-  CATEGORY_LIST,
-  CustomerCategory,
-  CustomerData,
-  CustomerProperty,
-  FUNNEL_PROPERTIES,
-  MAP_PROPS_TO_TEXT,
-  PROPERTIES_LIST,
-} from "./types";
-import { formatCustomerData, formatPropertySelectionMenu } from "./utils";
+	CATEGORY_LIST,
+	CustomerCategory,
+	CustomerData,
+	CustomerProperty,
+	Funnel,
+	FUNNEL_PROPERTIES,
+	MAP_PROPS_TO_TEXT,
+	PROPERTIES_LIST,
+} from "../types";
+import {
+	formatCustomerData,
+	formatPropertySelectionMenu,
+} from "../utils/formats";
 
 // Fungsi yang dijalankan sebelum mengubah userState menjadi "select_category"
 export function goToSelectCategory(
@@ -25,27 +29,27 @@ export function goToSelectCategory(
 		one_time_keyboard: true,
 		resize_keyboard: true,
 	});
-	updateUserCache(env, chatId, { user_state: "awaiting_category_selection" });
+	updateUserCacheD1(env, chatId, { user_state: "awaiting_category_selection" });
 }
 
 // Fungsi yang dijalankan sebelum mengubah userState menjadi "select_customer"
 export function goToSelectCustomer(
 	env: Env,
 	chatId: number,
-	customerList: string[] | null,
+	customerList: CustomerData[],
 	chosenCategory: CustomerCategory
 ): void {
-	const category = chosenCategory;
+	const customerNames = customerList.map((c) => c.customer_name);
 	let clientText: string;
 
-	if (customerList === null || customerList.length === 0) {
+	if (customerNames.length === 0) {
 		/**
-		 * Jika customerList masih kosong, beri pesan bahwa kategori masih kosong
+		 * Jika customerNames masih kosong, beri pesan bahwa kategori masih kosong
 		 * Kemudian, berikan pilihan:
 		 *   YA untuk menambahkan pelanggan
 		 *   TIDAK untuk memilih kategori pelanggan kembali
 		 */
-		sendMessage(env, chatId, "Kategori " + category + " masih kosong.");
+		sendMessage(env, chatId, "Kategori " + chosenCategory + " masih kosong.");
 
 		clientText = "➡️ Ketik `NEW [nama_gc]` untuk menambahkan pelanggan baru.\n";
 		clientText += "contoh: **NEW SMA 8 Bandung**.\n\n";
@@ -53,12 +57,12 @@ export function goToSelectCustomer(
 			"➡️ Pilih atau ketik **CANCEL** untuk kembali ke pilihan **kategori** pelanggan.";
 	} else {
 		/**
-		 * Jika customerList.length > 0, tampilkan daftarnya
+		 * Jika customerNames.length > 0, tampilkan daftarnya
 		 * Kemudian, berikan instruksi untuk memilih.
 		 */
-		clientText = "Daftar Customer untuk kategori " + category + ":\n";
-		for (let i = 0; i < customerList.length; i++) {
-			clientText = String(i + 1) + ". " + customerList[i] + "\n";
+		clientText = "Daftar Customer untuk kategori " + chosenCategory + ":\n";
+		for (let i = 0; i < customerNames.length; i++) {
+			clientText = String(i + 1) + ". " + customerNames[i] + "\n";
 		}
 		sendMessage(env, chatId, clientText);
 
@@ -78,9 +82,9 @@ export function goToSelectCustomer(
 		resize_keyboard: true,
 	});
 
-	updateUserCache(env, chatId, {
+	updateUserCacheD1(env, chatId, {
 		user_state: "awaiting_customer_selection",
-		customer_category: category as CustomerCategory,
+		customer_category: chosenCategory,
 	});
 
 	return;
@@ -109,7 +113,7 @@ export function goToCreateCustomer(
 		resize_keyboard: true,
 	});
 
-	updateUserCache(env, chatId, {
+	updateUserCacheD1(env, chatId, {
 		user_state: "awaiting_customer_creation",
 		customer_name: customerName,
 	});
@@ -125,33 +129,31 @@ export function goToUpdateCustomer(
 	let defaultText: string;
 	defaultText = "**KONFIRMASI DATA**\n\n";
 	defaultText += "Apakah pelanggan yang terpilih ini sudah benar?\n";
-
-	let clientText = customText || defaultText;
-	clientText += formatCustomerData(customerData);
-	clientText +=
+	defaultText += formatCustomerData(customerData);
+	defaultText +=
 		"\nJika anda ingin meng-UPDATE GC ini, silahkan klik tombol **OK**. Jika tidak, silahkan klik tombol **Cancel**";
 
-	sendMessage(env, chatId, clientText, {
+	sendMessage(env, chatId, customText || defaultText, {
 		keyboard: [["OK"], ["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
 	});
 
-	updateUserCache(env, chatId, {
+	updateUserCacheD1(env, chatId, {
 		user_state: "awaiting_customer_update",
-		customer_name: customerData.name,
+		customer_name: customerData.customer_name,
 	});
 }
 
 export function goToSelectProperty(
-  env: Env,
+	env: Env,
 	chatId: number,
 	category: CustomerCategory,
-	customerData: CustomerData | null = null,
+	customerData?: CustomerData,
 	customText?: string
 ): void {
 	// Menampilkan data detail pelanggan saat ini
-	if (customerData !== null) {
+	if (customerData) {
 		let detailedText = "Berikut adalah data pelanggan saat ini.\n\n";
 		detailedText += formatCustomerData(customerData);
 		sendMessage(env, chatId, detailedText);
@@ -166,20 +168,20 @@ export function goToSelectProperty(
 		resize_keyboard: true,
 	});
 
-	updateUserCache(env, chatId, { user_state: "awaiting_property_selection" });
+	updateUserCacheD1(env, chatId, { user_state: "awaiting_property_selection" });
 }
 
 export function goToUpdateProperty(
-  env: Env,
+	env: Env,
 	chatId: number,
 	chosenProperty: CustomerProperty,
 	customerData: CustomerData
 ): void {
 	let clientText;
-	let keyboardOptions;
+	let keyboardOptions: Array<Array<Funnel | "CANCEL" | "SUDAH" | "BELUM">>;
 	clientText = `Status ${MAP_PROPS_TO_TEXT[chosenProperty]} untuk pelanggan ini adalah sebagai berikut:\n\n`;
 	clientText += `Kategori: ${customerData.customer_category}\n`;
-	clientText += `Nama GC: ${customerData.name}\n`;
+	clientText += `Nama GC: ${customerData.customer_name}\n`;
 	clientText += `${MAP_PROPS_TO_TEXT[chosenProperty]}: `;
 	sendMessage(env, chatId, clientText);
 
@@ -198,10 +200,10 @@ export function goToUpdateProperty(
 		keyboardOptions = [["SUDAH"], ["BELUM"], ["CANCEL"]];
 	} else if (FUNNEL_PROPERTIES.includes(chosenProperty)) {
 		keyboardOptions = [
-			["F0 (lead)"],
-			["F3 (submit)"],
-			["F4 (negotiation)"],
-			["F5 (win)"],
+			["F0"],
+			["F3"],
+			["F4"],
+			["F5"],
 			["CANCEL"],
 		];
 	} else {
@@ -214,7 +216,7 @@ export function goToUpdateProperty(
 		resize_keyboard: true,
 	});
 
-	updateUserCache(env, chatId, {
+	updateUserCacheD1(env, chatId, {
 		user_state: "awaiting_property_update",
 		customer_property: chosenProperty,
 	});
