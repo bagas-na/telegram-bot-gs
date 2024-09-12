@@ -1,10 +1,10 @@
-import { CustomerCategory, CustomerData } from "./types";
+import { CustomerCategory, CustomerData } from "../types";
 
 export function formatCustomerData(customerData: CustomerData): string {
   let formatText;
   formatText = "------\n";
   formatText += "Kategori: " + customerData.customer_category + "\n";
-  formatText += "Nama GC: " + customerData.name + "\n";
+  formatText += "Nama GC: " + customerData.customer_name + "\n";
   formatText += "Submit Proposal (sudah/belum): " + customerData.submit_proposal ? "sudah" : "belum" + "\n";
   formatText += "Connectivity: " + customerData.connectivity + "\n";
   formatText += "Antares Eazy: " + customerData.eazy + "\n";
