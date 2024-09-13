@@ -23,11 +23,21 @@ export default async function handleCreateCustomer(
 		console.warn(
 			`customer_category field of ${chatId}'s user_cache is undefined`
 		);
+		await sendMessage(env, chatId, "Terjadi kesalahan", "HTML", {
+			keyboard: [["OK"], ["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
 	if (customerName === undefined || customerName === null) {
 		console.warn(`customer_name field of ${chatId}'s user_cache is undefined`);
+		await sendMessage(env, chatId, "Terjadi kesalahan", "HTML", {
+			keyboard: [["OK"], ["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 

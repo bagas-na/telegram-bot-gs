@@ -5,7 +5,7 @@ import {
 	goToSelectProperty,
 	goToUpdateProperty,
 } from "../stateTransitions/stateTransitions";
-import { CustomerProperty, PROPERTIES, UserCache } from "../types";
+import { CustomerProperty, PROPERTIES, PROPERTIES_LIST, UserCache } from "../types";
 
 export default async function handleSelectProperty(
 	env: Env,
@@ -23,11 +23,21 @@ export default async function handleSelectProperty(
 		console.warn(
 			`customer_category field of ${chatId}'s user_cache is undefined`
 		);
+		await sendMessage(env, chatId, "Terjadi kesalahan.", "HTML", {
+			keyboard: [...PROPERTIES_LIST, ["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
 	if (customerName === undefined || customerName === null) {
 		console.warn(`customer_name field of ${chatId}'s user_cache is undefined`);
+		await sendMessage(env, chatId, "Terjadi kesalahan.", "HTML", {
+			keyboard: [...PROPERTIES_LIST, ["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 

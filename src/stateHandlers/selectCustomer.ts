@@ -22,6 +22,11 @@ export default async function handleSelectCustomer(
 		console.warn(
 			`customer_category field of ${chatId}'s user_cache is undefined`
 		);
+		await sendMessage(env, chatId, "Terjadi kesalahan", "HTML", {
+			keyboard: [["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
@@ -29,6 +34,11 @@ export default async function handleSelectCustomer(
 	const commandText = message.text;
 	if (commandText === undefined) {
 		console.warn("Message content is empty, exit from handleSelectCustomer()");
+		await sendMessage(env, chatId, "Pesan terkirim kosong", "HTML", {
+			keyboard: [["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
@@ -42,6 +52,11 @@ export default async function handleSelectCustomer(
 	const customerName = args.join(" ").trim();
 	if (command === undefined || customerName === "") {
 		console.log("Empty command argument");
+		await sendMessage(env, chatId, "Perintah yang dimasukkan tidak valid", "HTML", {
+			keyboard: [["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
@@ -85,6 +100,11 @@ export default async function handleSelectCustomer(
 				console.warn(
 					`Invalid command. Entered '${command}'. Valid commands include 'NEW', 'UPDATE', and 'CANCEL"`
 				);
+				await sendMessage(env, chatId, "Perintah yang dimasukkan tidak valid", "HTML", {
+					keyboard: [["CANCEL"]],
+					one_time_keyboard: true,
+					resize_keyboard: true,
+				});
 		}
 		return;
 	} catch (error) {
