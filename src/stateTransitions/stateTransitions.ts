@@ -22,7 +22,7 @@ export async function goToSelectCategory(
 	chatId: number,
 	customText?: string
 ): Promise<void> {
-	console.log("Going to select category...")
+	//console.log("Going to select category...")
 	let defaultText = "<strong>Silahkan pilih kategori pelanggan</strong>\n";
 	defaultText += "Langsung klik saja pada tombol yang muncul di bawah!";
 
@@ -44,10 +44,10 @@ export async function goToSelectCustomer(
 	customerList: CustomerData[],
 	chosenCategory: CustomerCategory
 ): Promise<void> {
-	console.log("Going to select customer...")
+	//console.log("Going to select customer...")
 	const customerNames = customerList.map((c) => c.customer_name);
 	let clientText: string;
-	console.log("Existing customer list. ", customerNames)
+	//console.log("Existing customer list. ", customerNames)
 
 	if (customerNames.length === 0) {
 		/**
@@ -102,7 +102,7 @@ export async function goToCreateCustomer(
 	category: CustomerCategory,
 	customerName: string
 ): Promise<void> {
-	console.log("Going to create customer...")
+	//console.log("Going to create customer...")
 	let clientText: string;
 
 	clientText = "<strong>KONFIRMASI DATA</strong>\n\n";
@@ -135,7 +135,7 @@ export async function goToUpdateCustomer(
 	customerData: CustomerData,
 	customText?: string
 ): Promise<void> {
-	console.log("Going to update customer...")
+	//console.log("Going to update customer...")
 	let defaultText: string;
 	defaultText = "<strong>KONFIRMASI DATA</strong>\n\n";
 	defaultText += "Apakah pelanggan yang terpilih ini sudah benar?\n";
@@ -164,7 +164,7 @@ export async function goToSelectProperty(
 	customerData?: CustomerData,
 	customText?: string
 ): Promise<void> {
-	console.log("Going to select property...")
+	//console.log("Going to select property...")
 	// Menampilkan data detail pelanggan saat ini
 	if (customerData) {
 		let detailedText = "Berikut adalah data pelanggan saat ini.\n\n";
@@ -192,7 +192,7 @@ export async function goToUpdateProperty(
 	chosenProperty: CustomerProperty,
 	customerData: CustomerData
 ): Promise<void> {
-	console.log("Going to update category...")
+	//console.log("Going to update category...")
 	let clientText;
 	let keyboardOptions: Array<Array<Funnel | "CANCEL" | "SUDAH" | "BELUM">>;
 	clientText = `Status <strong>${MAP_PROPS_TO_TEXT[chosenProperty]}</strong> untuk pelanggan ini adalah sebagai berikut:\n\n`;

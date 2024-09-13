@@ -82,13 +82,13 @@ export async function insertNewCustomerD1(
 			"INSERT INTO project_data (telegram_id, account_manager, customer_category, customer_name) VALUES (?1, ?2, ?3, ?4)"
 		);
 
-		console.log(`Getting user name for chatId: ${chatId}...`)
+		//console.log(`Getting user name for chatId: ${chatId}...`)
 		const userName = await getCurrentUserNameD1(env, chatId);
-		console.log(`Inserting new customer ${JSON.stringify({chatId, userName, customerCategory, customerName})}`)
+		//console.log(`Inserting new customer ${JSON.stringify({chatId, userName, customerCategory, customerName})}`)
 		const { success } = await stmt
 			.bind(chatId, userName, customerCategory, customerName)
 			.all();
-		console.log(`Insert success = ${success}`)
+		//console.log(`Insert success = ${success}`)
 
 		return success;
 	} catch (error) {
@@ -182,7 +182,7 @@ export async function getUserCacheD1(
 	env: Env,
 	chatId: number
 ): Promise<UserCache | null> {
-	console.log("Reading user cache...")
+	//console.log("Reading user cache...")
 	try {
 		const stmt = env.DATABASE.prepare(
 			"SELECT user_state, customer_category, customer_name, customer_property FROM user_cache WHERE telegram_id = ?1"
@@ -192,7 +192,7 @@ export async function getUserCacheD1(
 		const cache = await stmt.bind(chatId).first<UserCache>();
 
 		if (cache) {
-			console.log("Cache retreived successfully.", JSON.stringify(cache))
+			//console.log("Cache retreived successfully.", JSON.stringify(cache))
 			return cache;
 		} else {
 			console.warn(`No cache found for chatId: ${chatId}`);
@@ -209,7 +209,7 @@ export async function updateUserCacheD1(
 	chatId: number,
 	updateCache: Partial<UserCache>
 ): Promise<boolean> {
-	console.log("Updating user cache...");
+	//console.log("Updating user cache...");
 	try {
 		// Create an array to hold the dynamic SQL parts
 		const updates = []; // for constructing query
@@ -250,7 +250,7 @@ export async function updateUserCacheD1(
 
 		// Execute the update statement
 		const { success } = await stmt.bind(...values).all();
-		console.log(`The query '${sql}' | with values: ${values} | has ${success ? 'completed' : 'failed'}.`)
+		//console.log(`The query '${sql}' | with values: ${values} | has ${success ? 'completed' : 'failed'}.`)
 
 		return success;
 	} catch (error) {

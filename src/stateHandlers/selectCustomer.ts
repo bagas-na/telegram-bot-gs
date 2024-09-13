@@ -17,7 +17,7 @@ export default async function handleSelectCustomer(
 	const chatId = message.chat.id;
 
 	const category = userCache.customer_category;
-	console.log(JSON.stringify({ chatId, category }));
+	//console.log(JSON.stringify({ chatId, category }));
 	if (category === undefined) {
 		console.warn(
 			`customer_category field of ${chatId}'s user_cache is undefined`
@@ -51,7 +51,7 @@ export default async function handleSelectCustomer(
 	const [command, ...args] = commandText.trim().split(" ");
 	const customerName = args.join(" ").trim();
 	if (command === undefined || customerName === "") {
-		console.log("Empty command argument");
+		//console.log("Empty command argument");
 		await sendMessage(env, chatId, "Perintah yang dimasukkan tidak valid", "HTML", {
 			keyboard: [["CANCEL"]],
 			one_time_keyboard: true,
@@ -60,18 +60,14 @@ export default async function handleSelectCustomer(
 		return;
 	}
 
-	console.log(
-		`The text "${message.text}" has been parsed into command: "${command}", customerName: "${customerName}"`
-	);
+	//console.log(`The text "${message.text}" has been parsed into command: "${command}", customerName: "${customerName}"`);
 
 	try {
 		const existingCustomerList = await getCustomerListD1(env, chatId, category);
 
 		switch (command.toUpperCase()) {
 			case "NEW":
-				console.log(
-					`Creating new customer with category: "${category}", customerName: ${customerName}`
-				);
+				//console.log(`Creating new customer with category: "${category}", customerName: ${customerName}`);
 				await caseSelectNewCustomer(
 					env,
 					chatId,
@@ -81,9 +77,7 @@ export default async function handleSelectCustomer(
 				);
 				break;
 			case "UPDATE":
-				console.log(
-					`Updating customer with category: "${category}", customerName: ${customerName}`
-				);
+				//console.log(`Updating customer with category: "${category}", customerName: ${customerName}`);
 				await caseSelectUpdateCustomer(
 					env,
 					chatId,
@@ -93,7 +87,7 @@ export default async function handleSelectCustomer(
 				);
 				break;
 			case "CANCEL":
-				console.log("Canceling selecting/creating a customer...");
+				//console.log("Canceling selecting/creating a customer...");
 				await goToSelectCategory(env, chatId);
 				break;
 			default:
@@ -126,12 +120,12 @@ async function caseSelectNewCustomer(
 
 	// Cek apabila nama pelanggan sudah ada dalam list
 	if (!existingCustomerNames.includes(customerName.toLowerCase())) {
-		console.log("Yep, this customer is new");
+		//console.log("Yep, this customer is new");
 		await goToCreateCustomer(env, chatId, category, customerName);
 		return;
 	}
 
-	console.log("Actually, we already have your customer.");
+	//console.log("Actually, we already have your customer.");
 	// Jika pelanggan sudah ada, ambil data pelanggan tersebut.
 	const customerData = existingCustomerList.filter(
 		(c) => c.customer_name.toLowerCase() === customerName.toLowerCase()
@@ -177,11 +171,11 @@ async function caseSelectUpdateCustomer(
 		customerIndex > 0 &&
 		customerIndex <= existingCustomerList.length
 	) {
-		console.log(`We are using your number, ${customerIndex}, as the index...`);
+		//console.log(`We are using your number, ${customerIndex}, as the index...`);
 		const customerData = existingCustomerList[
 			customerIndex - 1
 		] as CustomerData;
-		console.log(`...to update the customer ${JSON.stringify(customerData)}.`);
+		//console.log(`...to update the customer ${JSON.stringify(customerData)}.`);
 		await goToUpdateCustomer(env, chatId, category, customerData);
 		return;
 	}
@@ -189,7 +183,7 @@ async function caseSelectUpdateCustomer(
 	// Jika no. urut di luar batas, berikan informasi mengenai batasan
 	if (customerIndex) {
 		clientText = `Angka yang anda masukkan, <strong>${customerIndex}</strong> berada di luar list ( 1 - ${String(existingCustomerList.length)} ).`;
-		console.log(`Your number, ${customerIndex}, is out of bounds`);
+		//console.log(`Your number, ${customerIndex}, is out of bounds`);
 		await sendMessage(env, chatId, clientText, "HTML", {
 			keyboard: [["CANCEL"]],
 			one_time_keyboard: true,
@@ -206,9 +200,7 @@ async function caseSelectUpdateCustomer(
 		const customerData = existingCustomerList.filter(
 			(c) => c.customer_name.toLowerCase() === customerName.toLowerCase()
 		)[0] as CustomerData;
-		console.log(
-			`We are using the name of the customer, ${customerName}, to update the customer data.`
-		);
+		//console.log(`We are using the name of the customer, ${customerName}, to update the customer data.`);
 		await goToUpdateCustomer(env, chatId, category, customerData);
 		return;
 	}

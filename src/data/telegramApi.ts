@@ -32,7 +32,7 @@ export async function sendMessage(
 		messageBody.reply_markup = replyMarkup
 	}
 
-	console.log(`Sending message to ${Url}, ${JSON.stringify(messageBody)}`)
+	//console.log(`Sending message to ${Url}, ${JSON.stringify(messageBody)}`)
 
 	const options: RequestInit = {
 		method: "POST",
@@ -44,10 +44,10 @@ export async function sendMessage(
 
 	const response = await fetch(Url, options);
 
-	console.log(`Sent message status ${JSON.stringify({ok: response.ok, status: response.status, statusText: response.statusText})}`)
+	//console.log(`Sent message status ${JSON.stringify({ok: response.ok, status: response.status, statusText: response.statusText})}`)
 	if(!response.ok) {
 		const responseJSON = await response.json();
-		console.log(responseJSON)
+		//console.log(responseJSON)
 	}
 
 	return response

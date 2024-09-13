@@ -24,8 +24,8 @@ import { goToSelectCategory } from "./stateTransitions/stateTransitions";
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		console.log('\n--------------------------\n')
-		console.log("Request received:");
+		//console.log('\n--------------------------\n')
+		//console.log("Request received:");
 
 		if (request.method !== "POST") {
 			return new Response("Method not supported", { status: 405 });
@@ -40,20 +40,18 @@ export default {
 			const update: Update = await request.json();
 
 			if (update.message) {
-				console.log("Handle JSON as a new message");
+				//console.log("Handle JSON as a new message");
 				await handleNewMessage(env, update.message);
 				return new Response("JSON received successfully", { status: 200 });
 			}
 
 			if (update.callback_query) {
-				console.log("Handle JSON as a query");
+				//console.log("Handle JSON as a query");
 				handleCallbackQuery(env, update.callback_query);
 				return new Response("JSON received successfully", { status: 200 });
 			}
 
-			console.log(
-				"Valid JSON, but not a telegram message nor telegram callback query"
-			);
+			//console.log("Valid JSON, but not a telegram message nor telegram callback query");
 			return new Response("Internal Server Error", { status: 500 });
 		} catch (error) {
 			console.error("Request body is not valid JSON", error);
@@ -69,7 +67,7 @@ async function handleNewMessage(env: Env, message: Message) {
 	const fullName = [firstName, lastName].join(" ").trim();
 	const cache = await getUserCacheD1(env, chatId);
 
-	console.log(`Message content: ${JSON.stringify({chatId, firstName, lastName, messageText: message.text})}.`);
+	//console.log(`Message content: ${JSON.stringify({chatId, firstName, lastName, messageText: message.text})}.`);
 
 	// Mengecek apakah user terdaftar
 	if (!isRegisteredUserD1(env, chatId)) {
@@ -83,7 +81,7 @@ async function handleNewMessage(env: Env, message: Message) {
 	}
 
 	if (message.text === "/start") {
-		console.log("Handling a /start message");
+		//console.log("Handling a /start message");
 		await sendMessage(env, chatId, `Hai <strong>${fullName}</strong>, Anda sudah terdaftar`, "HTML");
 		await goToSelectCategory(env, chatId);
 		return;
@@ -91,31 +89,31 @@ async function handleNewMessage(env: Env, message: Message) {
 
 	switch (cache?.user_state) {
 		case "awaiting_category_selection":
-			console.log("Handle category selection");
+			//console.log("Handle category selection");
 			await handleSelectCategory(env, message);
 			break;
 		case "awaiting_customer_selection":
-			console.log("Handle customer selection");
+			//console.log("Handle customer selection");
 			await handleSelectCustomer(env, message, cache);
 			break;
 		case "awaiting_customer_creation":
-			console.log("Handle customer creation");
+			//console.log("Handle customer creation");
 			await handleCreateCustomer(env, message, cache);
 			break;
 		case "awaiting_customer_update":
-			console.log("Handle customer update");
+			//console.log("Handle customer update");
 			await handleUpdateCustomer(env, message, cache);
 			break;
 		case "awaiting_property_selection":
-			console.log("Handle property selection");
+			//console.log("Handle property selection");
 			await handleSelectProperty(env, message, cache);
 			break;
 		case "awaiting_property_update":
-			console.log("Handle property update")
+			//console.log("Handle property update")
 			await handleUpdateProperty(env, message, cache);
 			break;
 		default:
-			console.log("Handling with default handler")
+			//console.log("Handling with default handler")
 			await sendMessage(env, chatId, `Hai <strong>${fullName}</strong>, Anda sudah terdaftar.`, "HTML");
 			await goToSelectCategory(env, chatId);
 	}
