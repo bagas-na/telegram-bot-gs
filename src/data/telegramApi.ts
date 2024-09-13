@@ -1,23 +1,38 @@
 import { ReplyMarkup } from "../types";
 
+type MessageBody = {
+	chat_id: number;
+	text: string;
+	parse_mode?: "MarkdownV2" | "HTML" | "Markdown";
+	reply_markup?: ReplyMarkup;
+}
+
 // Fungsi untuk mengirim teks ke chat dengan markup keyboard
 export async function sendMessage(
 	env: Env,
 	chatId: number,
 	text: string,
+	parse_mode?: "MarkdownV2" | "HTML" | "Markdown",
 	replyMarkup?: ReplyMarkup
 ): Promise<Response> {
 	const apiMethod = "/sendMessage";
 	const Url = env.TELEGRAM_API_URL + env.BOT_TOKEN + apiMethod;
 
 	
-	const messageBody = {
+	const messageBody: MessageBody = {
 		chat_id: chatId,
 		text,
-		reply_markup: replyMarkup,
-		// parse_mode: "MarkdownV2" // MarkdownV2, HTML , or Markdown 
 	};
-	console.log(`Sending message: ${JSON.stringify(messageBody)}`)
+
+	if (parse_mode) {
+		messageBody.parse_mode = parse_mode
+	}
+
+	if (replyMarkup) {
+		messageBody.reply_markup = replyMarkup
+	}
+
+	console.log(`Sending message to ${Url}, ${JSON.stringify(messageBody)}`)
 
 	const options: RequestInit = {
 		method: "POST",
