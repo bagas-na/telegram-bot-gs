@@ -42,5 +42,13 @@ export async function sendMessage(
 		body: JSON.stringify(messageBody),
 	};
 
-	return await fetch(Url, options);
+	const response = await fetch(Url, options);
+
+	console.log(`Sent message status ${JSON.stringify({ok: response.ok, status: response.status, statusText: response.statusText})}`)
+	if(!response.ok) {
+		const responseJSON = await response.json();
+		console.log(responseJSON)
+	}
+
+	return response
 }

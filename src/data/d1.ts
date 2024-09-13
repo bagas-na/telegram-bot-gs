@@ -14,7 +14,7 @@ export async function getCustomerListD1(
 ): Promise<CustomerData[]> {
 	try {
 		const stmt = env.DATABASE.prepare(
-			`SELECT customer_name, ${PROPERTIES.join(", ")} FROM project_data WHERE telegram_id = ?1 AND customer_category = ?2`
+			`SELECT customer_category, customer_name, ${PROPERTIES.join(", ")} FROM project_data WHERE telegram_id = ?1 AND customer_category = ?2`
 		);
 
 		// Execute the query
@@ -45,7 +45,7 @@ export async function getCustomerDataD1(
 ): Promise<CustomerData | null> {
 	try {
 		const stmt = env.DATABASE.prepare(
-			`SELECT customer_name, ${PROPERTIES.join(
+			`SELECT customer_category, customer_name, ${PROPERTIES.join(
 				", "
 			)} FROM project_data WHERE telegram_id = ?1 AND customer_category = ?2 AND customer_name = ?3`
 		);

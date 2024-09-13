@@ -1,3 +1,4 @@
+import { ResponseParameters } from "@grammyjs/types";
 import { updateUserCacheD1 } from "../data/d1";
 import { sendMessage } from "../data/telegramApi";
 import {
@@ -30,7 +31,10 @@ export async function goToSelectCategory(
 		one_time_keyboard: true,
 		resize_keyboard: true,
 	});
+
 	await updateUserCacheD1(env, chatId, { user_state: "awaiting_category_selection" });
+
+	return;
 }
 
 // Fungsi yang dijalankan sebelum mengubah userState menjadi "select_customer"
@@ -52,7 +56,7 @@ export async function goToSelectCustomer(
 		 *   YA untuk menambahkan pelanggan
 		 *   TIDAK untuk memilih kategori pelanggan kembali
 		 */
-		await sendMessage(env, chatId, `Kategori </strong>${chosenCategory}</strong> masih kosong.`, "HTML");
+		await sendMessage(env, chatId, `Kategori <strong>${chosenCategory}</strong> masih kosong.`, "HTML");
 
 		clientText = "➡️ Ketik <strong>NEW [nama_gc]</strong> untuk menambahkan pelanggan baru.\n";
 		clientText += "contoh: <strong>NEW SMA 8 Bandung</strong>.\n\n";
@@ -120,6 +124,8 @@ export async function goToCreateCustomer(
 		user_state: "awaiting_customer_creation",
 		customer_name: customerName,
 	});
+
+	return;
 }
 
 export async function goToUpdateCustomer(
@@ -135,7 +141,7 @@ export async function goToUpdateCustomer(
 	defaultText += "Apakah pelanggan yang terpilih ini sudah benar?\n";
 	defaultText += formatCustomerDataHTML(customerData);
 	defaultText +=
-		"\nJika anda ingin meng-UPDATE GC ini, silahkan klik tombol </strong>OK</strong>. Jika tidak, silahkan klik tombol <strong>Cancel</strong>";
+		"\nJika anda ingin meng-UPDATE GC ini, silahkan klik tombol <strong>OK</strong>. Jika tidak, silahkan klik tombol <strong>Cancel</strong>";
 
 	await sendMessage(env, chatId, customText || defaultText, "HTML", {
 		keyboard: [["OK"], ["CANCEL"]],
@@ -147,6 +153,8 @@ export async function goToUpdateCustomer(
 		user_state: "awaiting_customer_update",
 		customer_name: customerData.customer_name,
 	});
+
+	return;
 }
 
 export async function goToSelectProperty(
@@ -174,6 +182,8 @@ export async function goToSelectProperty(
 	});
 
 	await updateUserCacheD1(env, chatId, { user_state: "awaiting_property_selection" });
+
+	return;
 }
 
 export async function goToUpdateProperty(
@@ -188,6 +198,7 @@ export async function goToUpdateProperty(
 	clientText = `Status <strong>${MAP_PROPS_TO_TEXT[chosenProperty]}</strong> untuk pelanggan ini adalah sebagai berikut:\n\n`;
 	clientText += `Kategori: <strong>${customerData.customer_category}</strong>\n`;
 	clientText += `Nama GC: <strong>${customerData.customer_name}</strong>\n`;
+	clientText += `${MAP_PROPS_TO_TEXT[chosenProperty]}: <strong>${customerData[chosenProperty]}</strong>`
 	await sendMessage(env, chatId, clientText, "HTML");
 
 	if (chosenProperty === "nilai_project") {
@@ -222,4 +233,6 @@ export async function goToUpdateProperty(
 		user_state: "awaiting_property_update",
 		customer_property: chosenProperty,
 	});
+
+	return;
 }

@@ -41,7 +41,6 @@ export default {
 
 			if (update.message) {
 				console.log("Handle JSON as a new message");
-				// console.log({ message: update.message });
 				await handleNewMessage(env, update.message);
 				return new Response("JSON received successfully", { status: 200 });
 			}

@@ -188,9 +188,7 @@ async function caseSelectUpdateCustomer(
 
 	// Jika no. urut di luar batas, berikan informasi mengenai batasan
 	if (customerIndex) {
-		clientText = `Angka yang anda masukkan, <strong>${customerIndex}</strong> berada di luar list ( 1 - ${String(
-			existingCustomerList.length + 1
-		)}).`;
+		clientText = `Angka yang anda masukkan, <strong>${customerIndex}</strong> berada di luar list ( 1 - ${String(existingCustomerList.length)} ).`;
 		console.log(`Your number, ${customerIndex}, is out of bounds`);
 		await sendMessage(env, chatId, clientText, "HTML", {
 			keyboard: [["CANCEL"]],
