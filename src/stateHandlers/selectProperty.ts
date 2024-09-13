@@ -1,11 +1,12 @@
 import { Message } from "@grammyjs/types";
-import { getCustomerDataD1 } from "../data/d1";
+import { getCustomerDataD1, getCustomerListD1 } from "../data/d1";
 import { sendMessage } from "../data/telegramApi";
 import {
+	goToSelectCustomer,
 	goToSelectProperty,
 	goToUpdateProperty,
 } from "../stateTransitions/stateTransitions";
-import { CustomerProperty, PROPERTIES, UserCache } from "../types";
+import { CustomerProperty, PROPERTIES, PROPERTIES_LIST, UserCache } from "../types";
 
 export default async function handleSelectProperty(
 	env: Env,
@@ -14,7 +15,7 @@ export default async function handleSelectProperty(
 ): Promise<void> {
 	const chatId = message.chat.id;
 	const chosenProperty = message.text
-		? (message.text.toUpperCase() as CustomerProperty | "CANCEL")
+		? (message.text.toLowerCase() as CustomerProperty | "cancel")
 		: null;
 	const category = userCache.customer_category;
 	const customerName = userCache.customer_name;
@@ -23,16 +24,26 @@ export default async function handleSelectProperty(
 		console.warn(
 			`customer_category field of ${chatId}'s user_cache is undefined`
 		);
+		await sendMessage(env, chatId, "Terjadi kesalahan.", "HTML", {
+			keyboard: [...PROPERTIES_LIST, ["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
 	if (customerName === undefined || customerName === null) {
 		console.warn(`customer_name field of ${chatId}'s user_cache is undefined`);
+		await sendMessage(env, chatId, "Terjadi kesalahan.", "HTML", {
+			keyboard: [...PROPERTIES_LIST, ["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
 	// Jika input user tidak sesuai dengan pilihan, perintahkan untuk input kategori kembali
-	if (chosenProperty === null || ![...PROPERTIES, "CANCEL"].includes(chosenProperty)) {
+	if (chosenProperty === null || ![...PROPERTIES, "cancel"].includes(chosenProperty)) {
 		await sendMessage(env, chatId, "Pilihan tidak ditemukan");
 		await goToSelectProperty(env, chatId, category);
 		return;
@@ -45,8 +56,9 @@ export default async function handleSelectProperty(
 			throw new Error("Failed to get customer data")
 		}
 
-		if (chosenProperty === "CANCEL") {
-			await goToSelectProperty(env, chatId, category, customerData);
+		if (chosenProperty === "cancel") {
+			const customerList = await getCustomerListD1(env, chatId, category);
+			await goToSelectCustomer(env, chatId, customerList, category);
 			return;
 		}
 

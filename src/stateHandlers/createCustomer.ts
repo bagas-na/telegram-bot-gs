@@ -23,11 +23,21 @@ export default async function handleCreateCustomer(
 		console.warn(
 			`customer_category field of ${chatId}'s user_cache is undefined`
 		);
+		await sendMessage(env, chatId, "Terjadi kesalahan", "HTML", {
+			keyboard: [["OK"], ["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
 	if (customerName === undefined || customerName === null) {
 		console.warn(`customer_name field of ${chatId}'s user_cache is undefined`);
+		await sendMessage(env, chatId, "Terjadi kesalahan", "HTML", {
+			keyboard: [["OK"], ["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
@@ -44,14 +54,10 @@ export default async function handleCreateCustomer(
 					customerName
 				);
 
-				// Kirim pesan konfirmasi
-				clientText =
-					"Data pelanggan baru telah disimpan dalam kategori " +
-					category +
-					".\n\n";
-
 				if (success) {
-					await sendMessage(env, chatId, clientText);
+					// Kirim pesan konfirmasi
+					clientText = `Data pelanggan baru telah disimpan dalam kategori <strong>${category}</strong>.\n\n`;
+					await sendMessage(env, chatId, clientText, "HTML");
 
 					// Mengambil data pelanggan setelah berhasil disimpan
 					const customerData = await getCustomerDataD1(

@@ -7,7 +7,7 @@ import {
 	goToUpdateCustomer,
 } from "../stateTransitions/stateTransitions";
 import { CustomerCategory, CustomerData, UserCache } from "../types";
-import { formatCustomerData } from "../utils/formats";
+import { formatCustomerDataHTML } from "../utils/formats";
 
 export default async function handleSelectCustomer(
 	env: Env,
@@ -15,19 +15,30 @@ export default async function handleSelectCustomer(
 	userCache: UserCache
 ): Promise<void> {
 	const chatId = message.chat.id;
-	
+
 	const category = userCache.customer_category;
-		if (category === undefined) {
-			console.warn(
-				`customer_category field of ${chatId}'s user_cache is undefined`
-			);
-			return;
-		}
+	//console.log(JSON.stringify({ chatId, category }));
+	if (category === undefined) {
+		console.warn(
+			`customer_category field of ${chatId}'s user_cache is undefined`
+		);
+		await sendMessage(env, chatId, "Terjadi kesalahan", "HTML", {
+			keyboard: [["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
+		return;
+	}
 
 	// Mengambil teks yg berisi [NEW atau UPDATE] dan [ANGKA atau NAMA GC]
 	const commandText = message.text;
 	if (commandText === undefined) {
 		console.warn("Message content is empty, exit from handleSelectCustomer()");
+		await sendMessage(env, chatId, "Pesan terkirim kosong", "HTML", {
+			keyboard: [["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
@@ -40,15 +51,23 @@ export default async function handleSelectCustomer(
 	const [command, ...args] = commandText.trim().split(" ");
 	const customerName = args.join(" ").trim();
 	if (command === undefined || customerName === "") {
-		console.log("Empty command argument");
+		//console.log("Empty command argument");
+		await sendMessage(env, chatId, "Perintah yang dimasukkan tidak valid", "HTML", {
+			keyboard: [["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
+
+	//console.log(`The text "${message.text}" has been parsed into command: "${command}", customerName: "${customerName}"`);
 
 	try {
 		const existingCustomerList = await getCustomerListD1(env, chatId, category);
 
 		switch (command.toUpperCase()) {
 			case "NEW":
+				//console.log(`Creating new customer with category: "${category}", customerName: ${customerName}`);
 				await caseSelectNewCustomer(
 					env,
 					chatId,
@@ -58,6 +77,7 @@ export default async function handleSelectCustomer(
 				);
 				break;
 			case "UPDATE":
+				//console.log(`Updating customer with category: "${category}", customerName: ${customerName}`);
 				await caseSelectUpdateCustomer(
 					env,
 					chatId,
@@ -67,12 +87,18 @@ export default async function handleSelectCustomer(
 				);
 				break;
 			case "CANCEL":
+				//console.log("Canceling selecting/creating a customer...");
 				await goToSelectCategory(env, chatId);
 				break;
 			default:
 				console.warn(
 					`Invalid command. Entered '${command}'. Valid commands include 'NEW', 'UPDATE', and 'CANCEL"`
 				);
+				await sendMessage(env, chatId, "Perintah yang dimasukkan tidak valid", "HTML", {
+					keyboard: [["CANCEL"]],
+					one_time_keyboard: true,
+					resize_keyboard: true,
+				});
 		}
 		return;
 	} catch (error) {
@@ -94,21 +120,24 @@ async function caseSelectNewCustomer(
 
 	// Cek apabila nama pelanggan sudah ada dalam list
 	if (!existingCustomerNames.includes(customerName.toLowerCase())) {
+		//console.log("Yep, this customer is new");
 		await goToCreateCustomer(env, chatId, category, customerName);
+		return;
 	}
 
+	//console.log("Actually, we already have your customer.");
 	// Jika pelanggan sudah ada, ambil data pelanggan tersebut.
 	const customerData = existingCustomerList.filter(
 		(c) => c.customer_name.toLowerCase() === customerName.toLowerCase()
 	)[0] as CustomerData;
 
 	clientText =
-		"Pelanggan dengan nama " + customerName + " sudah ada di dalam list.\n\n";
-	clientText += formatCustomerData(customerData);
+		`Pelanggan dengan nama <strong>${customerName}</strong> sudah ada di dalam list.\n\n`;
+	clientText += formatCustomerDataHTML(customerData);
 	clientText +=
-		"\nJika anda ingin meng-UPDATE GC ini, silahkan klik tombol **OK**. Jika tidak, silahkan klik tombol **Cancel**";
+		"\nJika anda ingin meng-UPDATE GC ini, silahkan klik tombol <strong>OK</strong>. Jika tidak, silahkan klik tombol <strong>Cancel</strong>";
 
-	await sendMessage(env, chatId, clientText, {
+	await sendMessage(env, chatId, clientText, "HTML", {
 		keyboard: [["OK"], ["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -142,19 +171,20 @@ async function caseSelectUpdateCustomer(
 		customerIndex > 0 &&
 		customerIndex <= existingCustomerList.length
 	) {
+		//console.log(`We are using your number, ${customerIndex}, as the index...`);
 		const customerData = existingCustomerList[
 			customerIndex - 1
 		] as CustomerData;
+		//console.log(`...to update the customer ${JSON.stringify(customerData)}.`);
 		await goToUpdateCustomer(env, chatId, category, customerData);
+		return;
 	}
 
 	// Jika no. urut di luar batas, berikan informasi mengenai batasan
-	else if (numberRegex.test(customerName)) {
-		clientText = `Angka yang anda masukkan, **${customerIndex}** berada di luar list ( 1 - ${String(
-			existingCustomerList.length + 1
-		)}).`;
-
-		await sendMessage(env, chatId, clientText, {
+	if (customerIndex) {
+		clientText = `Angka yang anda masukkan, <strong>${customerIndex}</strong> berada di luar list ( 1 - ${String(existingCustomerList.length)} ).`;
+		//console.log(`Your number, ${customerIndex}, is out of bounds`);
+		await sendMessage(env, chatId, clientText, "HTML", {
 			keyboard: [["CANCEL"]],
 			one_time_keyboard: true,
 			resize_keyboard: true,
@@ -162,6 +192,7 @@ async function caseSelectUpdateCustomer(
 		await updateUserCacheD1(env, chatId, {
 			user_state: "awaiting_customer_selection",
 		});
+		return;
 	}
 
 	// Jika menggunakan nama customer,
@@ -169,6 +200,8 @@ async function caseSelectUpdateCustomer(
 		const customerData = existingCustomerList.filter(
 			(c) => c.customer_name.toLowerCase() === customerName.toLowerCase()
 		)[0] as CustomerData;
+		//console.log(`We are using the name of the customer, ${customerName}, to update the customer data.`);
 		await goToUpdateCustomer(env, chatId, category, customerData);
+		return;
 	}
 }

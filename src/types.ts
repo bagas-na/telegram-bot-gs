@@ -28,7 +28,7 @@ export type UserCache = {
 export type CustomerData = {
   customer_category: string;
   customer_name: string;
-  submit_proposal: boolean;
+  submit_proposal: "SUDAH" | "BELUM";
   connectivity: Funnel;
   eazy: Funnel;
   oca: Funnel;
@@ -114,7 +114,7 @@ export const MAP_PROPS_TO_TEXT: { [key in CustomerProperty]: string } = {
   digiclinic: "DIGIClinic",
   pijar: "Pijar",
   sprinthink: "Sprinthink",
-  nilai_project: "Nilai proyek",
+  nilai_project: "Nilai project",
 } as const;
 
 export const MAP_COL_TO_PROPS: { [key: number]: CustomerProperty } = {

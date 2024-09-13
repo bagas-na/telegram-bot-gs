@@ -14,7 +14,7 @@ export async function getCustomerListD1(
 ): Promise<CustomerData[]> {
 	try {
 		const stmt = env.DATABASE.prepare(
-			`SELECT customer_name, ${PROPERTIES.join(", ")} FROM project_data WHERE telegram_id = ?1 AND customer_category = ?2`
+			`SELECT customer_category, customer_name, ${PROPERTIES.join(", ")} FROM project_data WHERE telegram_id = ?1 AND customer_category = ?2`
 		);
 
 		// Execute the query
@@ -45,7 +45,7 @@ export async function getCustomerDataD1(
 ): Promise<CustomerData | null> {
 	try {
 		const stmt = env.DATABASE.prepare(
-			`SELECT customer_name, ${PROPERTIES.join(
+			`SELECT customer_category, customer_name, ${PROPERTIES.join(
 				", "
 			)} FROM project_data WHERE telegram_id = ?1 AND customer_category = ?2 AND customer_name = ?3`
 		);
@@ -79,18 +79,21 @@ export async function insertNewCustomerD1(
 ): Promise<boolean> {
 	try {
 		const stmt = env.DATABASE.prepare(
-			"INSERT INTO project_data (telegram_id, nama_am, customer_category, customer_name) VALUES (?1, ?2, ?3, ?4)"
+			"INSERT INTO project_data (telegram_id, account_manager, customer_category, customer_name) VALUES (?1, ?2, ?3, ?4)"
 		);
 
+		//console.log(`Getting user name for chatId: ${chatId}...`)
 		const userName = await getCurrentUserNameD1(env, chatId);
+		//console.log(`Inserting new customer ${JSON.stringify({chatId, userName, customerCategory, customerName})}`)
 		const { success } = await stmt
 			.bind(chatId, userName, customerCategory, customerName)
 			.all();
+		//console.log(`Insert success = ${success}`)
 
 		return success;
 	} catch (error) {
 		console.error(
-			`Error inserting new customer data for chatID: ${chatId}, category: ${customerCategory}, customerName: ${customerName}`,
+			`Error inserting new customer data for ${JSON.stringify({chatId, customerCategory, customerName})}`,
 			error
 		);
 		throw new Error("Failed to insert new customer data.");
@@ -157,7 +160,8 @@ export async function getCurrentUserNameD1(
 			"SELECT name FROM users WHERE telegram_id = ?1"
 		);
 
-		const userName = await stmt.bind(chatId).first<string>();
+		const user = await stmt.bind(chatId).first<{"name": string}>()
+		const userName = user?.name;
 
 		if (userName) {
 			return userName;
@@ -178,6 +182,7 @@ export async function getUserCacheD1(
 	env: Env,
 	chatId: number
 ): Promise<UserCache | null> {
+	//console.log("Reading user cache...")
 	try {
 		const stmt = env.DATABASE.prepare(
 			"SELECT user_state, customer_category, customer_name, customer_property FROM user_cache WHERE telegram_id = ?1"
@@ -187,6 +192,7 @@ export async function getUserCacheD1(
 		const cache = await stmt.bind(chatId).first<UserCache>();
 
 		if (cache) {
+			//console.log("Cache retreived successfully.", JSON.stringify(cache))
 			return cache;
 		} else {
 			console.warn(`No cache found for chatId: ${chatId}`);
@@ -203,7 +209,7 @@ export async function updateUserCacheD1(
 	chatId: number,
 	updateCache: Partial<UserCache>
 ): Promise<boolean> {
-	console.log("Updating user cache...");
+	//console.log("Updating user cache...");
 	try {
 		// Create an array to hold the dynamic SQL parts
 		const updates = []; // for constructing query
@@ -244,7 +250,7 @@ export async function updateUserCacheD1(
 
 		// Execute the update statement
 		const { success } = await stmt.bind(...values).all();
-		console.log(`The query \n${sql}\n has ${success ? 'completed' : 'failed'}.`)
+		//console.log(`The query '${sql}' | with values: ${values} | has ${success ? 'completed' : 'failed'}.`)
 
 		return success;
 	} catch (error) {

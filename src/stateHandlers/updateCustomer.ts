@@ -1,5 +1,6 @@
 import { Message } from "@grammyjs/types";
 import { getCustomerDataD1, getCustomerListD1 } from "../data/d1";
+import { sendMessage } from "../data/telegramApi";
 import {
 	goToSelectCustomer,
 	goToSelectProperty,
@@ -22,11 +23,21 @@ export default async function handleUpdateCustomer(
 		console.warn(
 			`customer_category field of ${chatId}'s user_cache is undefined`
 		);
+		await sendMessage(env, chatId, "Terjadi kesalahan.", "HTML", {
+			keyboard: [["OK"], ["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
 	if (customerName === undefined || customerName === null) {
 		console.warn(`customer_name field of ${chatId}'s user_cache is undefined`);
+		await sendMessage(env, chatId, "Terjadi kesalahan.", "HTML", {
+			keyboard: [["OK"], ["CANCEL"]],
+			one_time_keyboard: true,
+			resize_keyboard: true,
+		});
 		return;
 	}
 
@@ -61,4 +72,5 @@ export default async function handleUpdateCustomer(
 			}
 			break;
 	}
+	return;
 }

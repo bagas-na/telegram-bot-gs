@@ -2,7 +2,7 @@ import { Message } from "@grammyjs/types";
 import { getCustomerDataD1, updateCustomerDataD1 } from "../data/d1";
 import { sendMessage } from "../data/telegramApi";
 import { goToSelectProperty } from "../stateTransitions/stateTransitions";
-import { Funnel, FUNNEL_PROPERTIES, UserCache } from "../types";
+import { CustomerData, Funnel, FUNNEL_PROPERTIES, UserCache } from "../types";
 
 export default async function handleUpdateProperty(
 	env: Env,
@@ -25,7 +25,7 @@ export default async function handleUpdateProperty(
 
 	if (
 		customerProperty === "submit_proposal" &&
-		!["SUDAH", "BELUM"].includes(updateValue as "SUDAH" | "BELUM")
+		!["SUDAH", "BELUM", "CANCEL"].includes(updateValue as "SUDAH" | "BELUM")
 	) {
 		console.warn(
 			`Property '${customerProperty}' can only take the values "SUDAH" and "BELUM". Current value ${updateValue}`
@@ -33,7 +33,7 @@ export default async function handleUpdateProperty(
 		return;
 	} else if (
 		FUNNEL_PROPERTIES.includes(customerProperty) &&
-		!["F0", "F3", "F4", "F5"].includes(updateValue as Funnel)
+		!["F0", "F3", "F4", "F5", "CANCEL"].includes(updateValue as Funnel)
 	) {
 		console.warn(
 			`Property '${customerProperty}' can only take the values "F0", "F3", "F4", and "F5. Current value ${updateValue}`
@@ -41,6 +41,7 @@ export default async function handleUpdateProperty(
 		return;
 	} else if (
 		customerProperty === "nilai_project" &&
+		updateValue !== "CANCEL" &&
 		!numberRegex.test(updateValue)
 	) {
 		console.warn(
@@ -50,7 +51,7 @@ export default async function handleUpdateProperty(
 	}
 
 	try {
-		const customerData = await getCustomerDataD1(
+		let customerData = await getCustomerDataD1(
 			env,
 			chatId,
 			category,
@@ -79,7 +80,13 @@ export default async function handleUpdateProperty(
 		);
 
 		if (success) {
-			await sendMessage(env, chatId, `Data ${customerProperty} telah diubah.`);
+			await sendMessage(env, chatId, `Data <strong>${customerProperty}</strong> telah diubah.`, "HTML");
+			customerData = await getCustomerDataD1(
+				env,
+				chatId,
+				category,
+				customerName
+			) as CustomerData
 			await goToSelectProperty(env, chatId, category, customerData);
 			return;
 		} else {
