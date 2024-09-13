@@ -24,6 +24,7 @@ import { goToSelectCategory } from "./stateTransitions/stateTransitions";
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
+		console.log('\n--------------------------\n')
 		console.log("Request received:");
 
 		if (request.method !== "POST") {
@@ -69,7 +70,7 @@ async function handleNewMessage(env: Env, message: Message) {
 	const fullName = [firstName, lastName].join(" ").trim();
 	const cache = await getUserCacheD1(env, chatId);
 
-	console.log({ chatId, fullName, cache, messageText: message.text });
+	console.log(`Message content: ${JSON.stringify({chatId, firstName, lastName, messageText: message.text})}.`);
 
 	// Mengecek apakah user terdaftar
 	if (!isRegisteredUserD1(env, chatId)) {
