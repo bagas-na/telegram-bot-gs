@@ -44,14 +44,10 @@ export default async function handleCreateCustomer(
 					customerName
 				);
 
-				// Kirim pesan konfirmasi
-				clientText =
-					"Data pelanggan baru telah disimpan dalam kategori " +
-					category +
-					".\n\n";
-
 				if (success) {
-					await sendMessage(env, chatId, clientText);
+					// Kirim pesan konfirmasi
+					clientText = `Data pelanggan baru telah disimpan dalam kategori <strong>${category}</strong>.\n\n`;
+					await sendMessage(env, chatId, clientText, "HTML");
 
 					// Mengambil data pelanggan setelah berhasil disimpan
 					const customerData = await getCustomerDataD1(

@@ -11,8 +11,8 @@ import {
 	PROPERTIES_LIST,
 } from "../types";
 import {
-	formatCustomerData,
-	formatPropertySelectionMenu,
+	formatCustomerDataHTML,
+	formatPropertySelectionMenuHTML,
 } from "../utils/formats";
 
 // Fungsi yang dijalankan sebelum mengubah userState menjadi "select_category"
@@ -22,10 +22,10 @@ export async function goToSelectCategory(
 	customText?: string
 ): Promise<void> {
 	console.log("Going to select category...")
-	let defaultText = "**Silahkan pilih kategori pelanggan**\n";
+	let defaultText = "<strong>Silahkan pilih kategori pelanggan</strong>\n";
 	defaultText += "Langsung klik saja pada tombol yang muncul di bawah!";
 
-	await sendMessage(env, chatId, customText || defaultText, {
+	await sendMessage(env, chatId, customText || defaultText, "HTML", {
 		keyboard: CATEGORY_LIST,
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -52,34 +52,33 @@ export async function goToSelectCustomer(
 		 *   YA untuk menambahkan pelanggan
 		 *   TIDAK untuk memilih kategori pelanggan kembali
 		 */
-		await sendMessage(env, chatId, "Kategori " + chosenCategory + " masih kosong.");
+		await sendMessage(env, chatId, `Kategori </strong>${chosenCategory}</strong> masih kosong.`, "HTML");
 
-		clientText = "➡️ Ketik `NEW [nama_gc]` untuk menambahkan pelanggan baru.\n";
-		clientText += "contoh: **NEW SMA 8 Bandung**.\n\n";
+		clientText = "➡️ Ketik <strong>NEW [nama_gc]</strong> untuk menambahkan pelanggan baru.\n";
+		clientText += "contoh: <strong>NEW SMA 8 Bandung</strong>.\n\n";
 		clientText +=
-			"➡️ Pilih atau ketik **CANCEL** untuk kembali ke pilihan **kategori** pelanggan.";
+			"➡️ Pilih atau ketik <strong>CANCEL</strong> untuk kembali ke <strong>pilihan kategori pelanggan</strong>.";
 	} else {
 		/**
 		 * Jika customerNames.length > 0, tampilkan daftarnya
 		 * Kemudian, berikan instruksi untuk memilih.
 		 */
-		clientText = "Daftar Customer untuk kategori " + chosenCategory + ":\n";
+		clientText = `Daftar Customer untuk kategori <strong>${chosenCategory}</strong>:\n`;
 		for (let i = 0; i < customerNames.length; i++) {
-			clientText += String(i + 1) + ". " + customerNames[i] + "\n";
+			clientText += `${String(i + 1)}.) ${customerNames[i]}\n`;
 		}
-		await sendMessage(env, chatId, clientText);
+		await sendMessage(env, chatId, clientText, "HTML");
 
-		clientText = "➡️ Ketik `NEW [nama_gc]` untuk menambahkan pelanggan baru.\n";
-		clientText += "contoh: **NEW SMA 8 Bandung**.\n\n";
+		clientText = "➡️ Ketik <strong>NEW [nama_gc]</strong> untuk menambahkan pelanggan baru.\n";
+		clientText += "contoh: <strong>NEW SMA 8 Bandung</strong>.\n\n";
+		clientText += "➡️ Ketik <strong>UPDATE [nama_gc]</strong> atau <strong>UPDATE [no. urut]</strong> untuk update informasi pelanggan.\n";
+		clientText += "contoh: <strong>UPDATE SMA 3 Bandung</strong>, atau <strong>UPDATE 12</strong>.\n\n";
 		clientText +=
-			"➡️ Ketik `UPDATE [nama_gc]` atau `UPDATE [no. urut]` untuk update informasi pelanggan.\n";
-		clientText += "contoh: **UPDATE SMA 3 Bandung**, atau **UPDATE 12**.\n\n";
-		clientText +=
-			"➡️ Pilih atau ketik **CANCEL** untuk kembali ke pilihan **kategori** pelanggan!";
+			"➡️ Pilih atau ketik <strong>CANCEL</strong> untuk kembali ke pilihan <strong>kategori</strong> pelanggan!";
 	}
 
 	// Berikan pilihan CANCEL jika user ingin kembali ke pilihan daftar kategori pelanggan
-	await sendMessage(env, chatId, clientText, {
+	await sendMessage(env, chatId, clientText, "HTML", {
 		keyboard: [["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -102,16 +101,16 @@ export async function goToCreateCustomer(
 	console.log("Going to create customer...")
 	let clientText: string;
 
-	clientText = "**KONFIRMASI DATA**\n\n";
+	clientText = "<strong>KONFIRMASI DATA</strong>\n\n";
 	clientText += "Apakah data pelanggan yang diinput ini sudah benar?\n";
 	clientText += "------\n";
-	clientText += "Kategori: " + category + "\n";
-	clientText += "Nama GC: " + customerName + "\n";
+	clientText += `Kategori: <strong>${category}</strong>\n`;
+	clientText += `Nama GC: <strong>${customerName}</strong>\n`;
 	clientText += "------\n\n";
 	clientText +=
-		"Jika sudah benar dan lurus, silahkan klik tombol **OK**. Jika belum, silahkan klik tombol **Cancel**";
+		"Jika sudah benar dan lurus, silahkan klik tombol <strong>OK</strong>. Jika belum, silahkan klik tombol <strong>Cancel</strong>";
 
-	await sendMessage(env, chatId, clientText, {
+	await sendMessage(env, chatId, clientText, "HTML", {
 		keyboard: [["OK"], ["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -132,13 +131,13 @@ export async function goToUpdateCustomer(
 ): Promise<void> {
 	console.log("Going to update customer...")
 	let defaultText: string;
-	defaultText = "**KONFIRMASI DATA**\n\n";
+	defaultText = "<strong>KONFIRMASI DATA</strong>\n\n";
 	defaultText += "Apakah pelanggan yang terpilih ini sudah benar?\n";
-	defaultText += formatCustomerData(customerData);
+	defaultText += formatCustomerDataHTML(customerData);
 	defaultText +=
-		"\nJika anda ingin meng-UPDATE GC ini, silahkan klik tombol **OK**. Jika tidak, silahkan klik tombol **Cancel**";
+		"\nJika anda ingin meng-UPDATE GC ini, silahkan klik tombol </strong>OK</strong>. Jika tidak, silahkan klik tombol <strong>Cancel</strong>";
 
-	await sendMessage(env, chatId, customText || defaultText, {
+	await sendMessage(env, chatId, customText || defaultText, "HTML", {
 		keyboard: [["OK"], ["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -161,14 +160,14 @@ export async function goToSelectProperty(
 	// Menampilkan data detail pelanggan saat ini
 	if (customerData) {
 		let detailedText = "Berikut adalah data pelanggan saat ini.\n\n";
-		detailedText += formatCustomerData(customerData);
-		await sendMessage(env, chatId, detailedText);
+		detailedText += formatCustomerDataHTML(customerData);
+		await sendMessage(env, chatId, detailedText, "HTML");
 	}
 
 	// Menampilkan pilihan property dari customer yang bisa diubah
-	let clientText = formatPropertySelectionMenu(category);
+	let clientText = formatPropertySelectionMenuHTML(category);
 
-	await sendMessage(env, chatId, clientText, {
+	await sendMessage(env, chatId, clientText, "HTML", {
 		keyboard: [...PROPERTIES_LIST, ["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -186,21 +185,17 @@ export async function goToUpdateProperty(
 	console.log("Going to update category...")
 	let clientText;
 	let keyboardOptions: Array<Array<Funnel | "CANCEL" | "SUDAH" | "BELUM">>;
-	clientText = `Status ${MAP_PROPS_TO_TEXT[chosenProperty]} untuk pelanggan ini adalah sebagai berikut:\n\n`;
-	clientText += `Kategori: ${customerData.customer_category}\n`;
-	clientText += `Nama GC: ${customerData.customer_name}\n`;
-	clientText += `${MAP_PROPS_TO_TEXT[chosenProperty]}: `;
-	await sendMessage(env, chatId, clientText);
+	clientText = `Status <strong>${MAP_PROPS_TO_TEXT[chosenProperty]}</strong> untuk pelanggan ini adalah sebagai berikut:\n\n`;
+	clientText += `Kategori: <strong>${customerData.customer_category}</strong>\n`;
+	clientText += `Nama GC: <strong>${customerData.customer_name}</strong>\n`;
+	await sendMessage(env, chatId, clientText, "HTML");
 
 	if (chosenProperty === "nilai_project") {
-		clientText =
-			"➡️ Masukkan estimasi nilai total proyek pada pelanggan ini.\n\n";
-		clientText +=
-			"➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
+		clientText =  "➡️ Masukkan estimasi nilai total proyek pada pelanggan ini.\n\n";
+		clientText += "➡️ Pilih atau Ketik <strong>CANCEL</strong> untuk kembali ke menu sebelumnya.";
 	} else {
-		clientText = `➡️ Klik pada tombol di bawah untuk mengubah status ${MAP_PROPS_TO_TEXT[chosenProperty]}.\n\n`;
-		clientText +=
-			"➡️ Pilih atau Ketik **CANCEL** untuk kembali ke menu sebelumnya.";
+		clientText =  `➡️ Klik pada tombol di bawah untuk mengubah status <strong>${MAP_PROPS_TO_TEXT[chosenProperty]}</strong>.\n\n`;
+		clientText += "➡️ Pilih atau Ketik <strong>CANCEL</strong> untuk kembali ke menu sebelumnya.";
 	}
 
 	if (chosenProperty === "submit_proposal") {
@@ -217,7 +212,7 @@ export async function goToUpdateProperty(
 		keyboardOptions = [["CANCEL"]];
 	}
 
-	await sendMessage(env, chatId, clientText, {
+	await sendMessage(env, chatId, clientText, "HTML", {
 		keyboard: keyboardOptions,
 		one_time_keyboard: true,
 		resize_keyboard: true,

@@ -1,36 +1,36 @@
 import { CustomerCategory, CustomerData } from "../types";
 
-export function formatCustomerData(customerData: CustomerData): string {
+export function formatCustomerDataHTML(customerData: CustomerData): string {
   let formatText;
   formatText = "------\n";
-  formatText += "Kategori: " + customerData.customer_category + "\n";
-  formatText += "Nama GC: " + customerData.customer_name + "\n";
-  formatText += "Submit Proposal (sudah/belum): " + customerData.submit_proposal ? "sudah" : "belum" + "\n";
-  formatText += "Connectivity: " + customerData.connectivity + "\n";
-  formatText += "Antares Eazy: " + customerData.eazy + "\n";
-  formatText += "OCA: " + customerData.oca + "\n";
-  formatText += "Digiclinic: " + customerData.digiclinic + "\n";
-  formatText += "Pijar: " + customerData.pijar + "\n";
-  formatText += "Sprinthink: " + customerData.sprinthink + "\n";
-  formatText += "Nilai Project (Rp): " + customerData.nilai_project + "\n";
+  formatText += `"Kategori: <strong>${customerData.customer_category}</strong>\n`;
+  formatText += `"Nama GC: <strong>${customerData.customer_name}</strong> + \n`;
+  formatText += `"Submit Proposal (sudah/belum): <strong>${customerData.submit_proposal}</strong>\n`;
+  formatText += `"Connectivity: <strong>${customerData.connectivity}</strong> \n`;
+  formatText += `"Antares Eazy: <strong>${customerData.eazy}</strong>\n`;
+  formatText += `"OCA: <strong>${customerData.oca}</strong>\n`;
+  formatText += `"Digiclinic: <strong>${customerData.digiclinic}</strong>\n`;
+  formatText += `"Pijar: <strong>${customerData.pijar}</strong>\n`;
+  formatText += `"Sprinthink: <strong>${customerData.sprinthink}</strong>\n`;
+  formatText += `"Nilai Project (Rp): <strong>${customerData.nilai_project}</strong>\n`;
   formatText += "------\n";
 
   return formatText;
 }
 
-export function formatPropertySelectionMenu(customerCategory: CustomerCategory): string {
+export function formatPropertySelectionMenuHTML(customerCategory: CustomerCategory): string {
   let formatText;
-  formatText = "**Silahkan pilih informasi GC yang ingin di diubah**\n";
+  formatText = "<strong>Silahkan pilih informasi GC yang ingin di diubah</strong>\n";
   formatText += "Langsung klik saja pada tombol yang muncul di bawah!\n\n";
-  formatText += "**submit_proposal**, apakah proposal masif telah dikirimkan.\n\n";
-  formatText += "**connectivity**, status funneling layanan Datin/WMS/Indibiz/etc.\n\n";
-  formatText += "**eazy**, status funneling Antares Eazy.\n\n";
-  formatText += "**oca**, status funneling OCA.\n\n";
-  formatText += "**digiclinic**, status funenling Digiclinic.\n\n";
-  formatText += "**pijar**, status funneling ekosistem Pijar.\n\n";
-  formatText += "**sprinthink**, status funneling Sprinthink.\n\n";
-  formatText += "**nilai_project**, estimasi nilai project.\n\n";
-  formatText += "**CANCEL**, kembali ke daftar pelanggan untuk kategori " + customerCategory + ".";
+  formatText += "<strong>submit_proposal</strong>, apakah proposal masif telah dikirimkan.\n\n";
+  formatText += "<strong>connectivity</strong>, status funneling layanan Datin/WMS/Indibiz/etc.\n\n";
+  formatText += "<strong>eazy</strong>, status funneling Antares Eazy.\n\n";
+  formatText += "<strong>oca</strong>, status funneling OCA.\n\n";
+  formatText += "<strong>digiclinic</strong>, status funenling Digiclinic.\n\n";
+  formatText += "<strong>pijar</strong>, status funneling ekosistem Pijar.\n\n";
+  formatText += "<strong>sprinthink</strong>, status funneling Sprinthink.\n\n";
+  formatText += "<strong>nilai_project</strong>, estimasi nilai project.\n\n";
+  formatText += `<strong>CANCEL</strong>, kembali ke daftar pelanggan untuk kategori ${customerCategory}.`;
 
   return formatText;
 }

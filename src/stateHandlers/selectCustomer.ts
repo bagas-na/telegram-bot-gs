@@ -7,7 +7,7 @@ import {
 	goToUpdateCustomer,
 } from "../stateTransitions/stateTransitions";
 import { CustomerCategory, CustomerData, UserCache } from "../types";
-import { formatCustomerData } from "../utils/formats";
+import { formatCustomerDataHTML } from "../utils/formats";
 
 export default async function handleSelectCustomer(
 	env: Env,
@@ -118,12 +118,12 @@ async function caseSelectNewCustomer(
 	)[0] as CustomerData;
 
 	clientText =
-		"Pelanggan dengan nama " + customerName + " sudah ada di dalam list.\n\n";
-	clientText += formatCustomerData(customerData);
+		`Pelanggan dengan nama <strong>${customerName}</strong> sudah ada di dalam list.\n\n`;
+	clientText += formatCustomerDataHTML(customerData);
 	clientText +=
-		"\nJika anda ingin meng-UPDATE GC ini, silahkan klik tombol **OK**. Jika tidak, silahkan klik tombol **Cancel**";
+		"\nJika anda ingin meng-UPDATE GC ini, silahkan klik tombol <strong>OK</strong>. Jika tidak, silahkan klik tombol <strong>Cancel</strong>";
 
-	await sendMessage(env, chatId, clientText, {
+	await sendMessage(env, chatId, clientText, "HTML", {
 		keyboard: [["OK"], ["CANCEL"]],
 		one_time_keyboard: true,
 		resize_keyboard: true,
@@ -168,11 +168,11 @@ async function caseSelectUpdateCustomer(
 
 	// Jika no. urut di luar batas, berikan informasi mengenai batasan
 	if (customerIndex) {
-		clientText = `Angka yang anda masukkan, **${customerIndex}** berada di luar list ( 1 - ${String(
+		clientText = `Angka yang anda masukkan, <strong>${customerIndex}</strong> berada di luar list ( 1 - ${String(
 			existingCustomerList.length + 1
 		)}).`;
 		console.log(`Your number, ${customerIndex}, is out of bounds`);
-		await sendMessage(env, chatId, clientText, {
+		await sendMessage(env, chatId, clientText, "HTML", {
 			keyboard: [["CANCEL"]],
 			one_time_keyboard: true,
 			resize_keyboard: true,

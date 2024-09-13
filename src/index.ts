@@ -74,20 +74,18 @@ async function handleNewMessage(env: Env, message: Message) {
 
 	// Mengecek apakah user terdaftar
 	if (!isRegisteredUserD1(env, chatId)) {
-		console.warn(
-			`User named: ${fullName} is not registered. (chatId: ${chatId})`
-		);
+		console.warn(`User named: ${fullName} is not registered. (chatId: ${chatId})`);
 		await sendMessage(
-			env,
-			chatId,
-			`Maaf ${fullName}, Anda belum terdaftar. Hubungi admin untuk pendaftaran.`
-		);
+			env, 
+			chatId, 
+			`Maaf <strong>${fullName}</strong>, Anda belum terdaftar. Hubungi admin untuk pendaftaran.`, 
+			"HTML");
 		return;
 	}
 
 	if (message.text === "/start") {
 		console.log("Handling a /start message");
-		await sendMessage(env, chatId, `Hai ${fullName}, Anda sudah terdaftar`);
+		await sendMessage(env, chatId, `Hai <strong>${fullName}</strong>, Anda sudah terdaftar`, "HTML");
 		await goToSelectCategory(env, chatId);
 		return;
 	}
@@ -119,7 +117,7 @@ async function handleNewMessage(env: Env, message: Message) {
 			break;
 		default:
 			console.log("Handling with default handler")
-			await sendMessage(env, chatId, `Hai ${fullName}, Anda sudah terdaftar`);
+			await sendMessage(env, chatId, `Hai <strong>${fullName}</strong>, Anda sudah terdaftar.`, "HTML");
 			await goToSelectCategory(env, chatId);
 	}
 

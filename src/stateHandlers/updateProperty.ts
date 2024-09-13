@@ -79,7 +79,7 @@ export default async function handleUpdateProperty(
 		);
 
 		if (success) {
-			await sendMessage(env, chatId, `Data ${customerProperty} telah diubah.`);
+			await sendMessage(env, chatId, `Data <strong>${customerProperty}</strong> telah diubah.`, "HTML");
 			await goToSelectProperty(env, chatId, category, customerData);
 			return;
 		} else {
