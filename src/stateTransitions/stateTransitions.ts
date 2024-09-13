@@ -202,7 +202,7 @@ export async function goToUpdateProperty(
 	await sendMessage(env, chatId, clientText, "HTML");
 
 	if (chosenProperty === "nilai_project") {
-		clientText =  "➡️ Masukkan estimasi nilai total proyek pada pelanggan ini.\n\n";
+		clientText =  "➡️ Masukkan estimasi nilai total project pada pelanggan ini.\n\n";
 		clientText += "➡️ Pilih atau Ketik <strong>CANCEL</strong> untuk kembali ke menu sebelumnya.";
 	} else {
 		clientText =  `➡️ Klik pada tombol di bawah untuk mengubah status <strong>${MAP_PROPS_TO_TEXT[chosenProperty]}</strong>.\n\n`;
